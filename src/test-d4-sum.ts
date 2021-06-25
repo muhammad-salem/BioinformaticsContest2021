@@ -1,9 +1,6 @@
-import { readInfo, writeCache } from './read.js';
 import { sort as TimSort } from 'timsort';
 import lodash from 'lodash';
 const { sortedIndexBy, remove } = lodash;
-
-// export type SumIndexed = { n: number, ni: number, k: number, ki: number, sum: number };
 
 export type GroupIndex = { mj: { m: number, mi: number }, kj: { k: number, ki: number }, sum: number };
 
