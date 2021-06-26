@@ -32,7 +32,7 @@ export function solve351() {
 		do {
 			const match = findFirstMatch(++index, delta, test, paths);
 			if (match.index === paths.length) {
-				appendOutput(`${(i > 0) ? '\n' : ''}-1 0`);
+				appendOutput(`-1 0\n`);
 				continue testLoop;
 			}
 			const isoForm = match.isoForm!;
@@ -61,13 +61,36 @@ export function solve351() {
 				}
 			}
 			if (matchCount == 0) {
+				index = match.index;
 				continue whileLoop;
 			}
-			appendOutput(`${(i > 0) ? '\n' : ''}${match.index} ${matchCount}`);
+			appendOutput(`${match.index} ${matchCount}\n`);
 			continue testLoop;
 		} while (index <= paths.length);
 	}
 }
+
+export function findFullMatch(index: number, delta: number, test: [number, number], isoForms: [number, number][][]) {
+	for (; index < isoForms.length; index++) {
+		const isoForm = isoForms[index];
+		if (isFullMatching(delta, test, isoForm[0])) {
+			return { index, start: 0, isoForm };
+		}
+	}
+	return { index };
+}
+
+export function findFullMatchIn(index: number, delta: number, test: [number, number], isoForms: [number, number][][]) {
+	for (; index < isoForms.length; index++) {
+		const isoForm = isoForms[index];
+		const start = sortedIndexBy(isoForm, test, a => isFullMatching(delta, test, a));
+		if (start < isoForm.length && start > 0) {
+			return { index, start, isoForm };
+		}
+	}
+	return { index };
+}
+
 
 export function findFirstMatch(index: number, delta: number, tests: [number, number][], isoForms: [number, number][][]) {
 	for (; index < isoForms.length; index++) {
