@@ -1,3 +1,5 @@
+import { solve32 } from './32/1.js';
+import { solve341 } from './34/341.js';
 import { readProblemName } from './read.js';
 import startD412 from './start-d-4.js';
 import startA from './test-a.js';
@@ -24,6 +26,17 @@ switch (problemName) {
 	case 'd-41':
 	case 'd-42':
 		startD412(); break;
+	case '321':
+		solve32(); break;
+	case '341':
+	case '342':
+	case '343':
+	case '344':
+	case '345':
+	case '346':
+	case '347':
+	case '348':
+		solve341(); break;
 	default:
 		break;
 }
