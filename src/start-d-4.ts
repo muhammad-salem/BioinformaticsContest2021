@@ -46,11 +46,30 @@ export default function startD412() {
 		// nsr = uniqBy(nsr, 'n');
 		TimSort(nsr, (a, b) => a.n - b.n);
 
-		const ns = lines[j + 3].split(' ')
-			.map(Number);
+		const ns = lines[j + 3].split(' ').map(Number);
 
-		console.log('.length', msr.length, ksr.length, nsr.length, ns.length);
+		console.log('.length', msr.length, ksr.length, nsr.length, i);
 
+		const nMin = nsr[0].n;
+		const nMax = nsr[nsr.length - 1].n;
+		const inputStart = i == 1 ? { i: 996745, j: 1 } : searchStart(nMin, msr, ksr);
+
+		if (inputStart.i > 0) {
+			msr.splice(0, inputStart.i);
+		}
+		// ksr.splice(0, inputStart.j);
+
+		const inputEnd = i == 1 ? { i: 1423, j: 491 } : searchEnd(nMax, msr, ksr);
+
+		if (inputEnd.i > 0) {
+			msr.splice(inputEnd.i);
+		}
+		// msr.splice(inputEnd.i);
+		// ksr.splice(inputEnd.j);
+
+
+		console.log({ nMin, nMax, inputStart, inputEnd });
+		console.log('.length', msr.length, ksr.length, nsr.length, i);
 
 		const total = msr.length * ksr.length;
 		let range: number, max: number;
@@ -63,9 +82,10 @@ export default function startD412() {
 			range = msr.length;
 			max = 1;
 		}
+
 		console.log({ max, range });
+
 		const multiArray = new MultiArray();
-		// const results: GroupIndex[][] = [];
 
 		const reducer = { exactlyFound: [] as NFound[], notExactly: [] as NFound[] };
 
@@ -112,6 +132,7 @@ export default function startD412() {
 
 		console.log('data length: ', data.length);
 		appendOutput(data);
+
 	}
 
 }
@@ -141,6 +162,7 @@ export function findSiInRange(
 	multiArray.sort();
 	console.log('sort: done');
 
+
 	const exactlyFound = new Array<NFound>(nsr.length);
 	const notExactly = new Array<NFound>(nsr.length);
 	let exactlyIndex = 0, notIndex = 0;
@@ -149,14 +171,14 @@ export function findSiInRange(
 		let num = multiArray.getFromCache(s.n);
 		if (num) {
 			exactlyFound[exactlyIndex++] = { n: s.n, ni: s.ni, f: num };
-			console.log('found in cache', num);
+			// console.log('found in cache', num);
 		} else {
 			num = multiArray.find(s.n);
 			if (num) {
 				notExactly[notIndex++] = { n: s.n, ni: s.ni, f: num };
-				console.log('found in array', num);
+				// console.log('found in array', num);
 			} else {
-				console.log('not found', num);
+				// console.log('not found', num);
 			}
 		}
 	});
@@ -165,5 +187,51 @@ export function findSiInRange(
 	multiArray.resetArray();
 	exactlyFound.forEach(f => remove(nsr, n => n.n === f.n));
 	return { exactlyFound, notExactly };
+}
+
+export function searchStart(
+	min: number,
+	msr: { m: number, mi: number }[],
+	ksr: { k: number, ki: number }[]): { i: number, j: number } {
+
+	let i = -1, j = -1;
+
+	outerLoop:
+	for (let y = 0; y < ksr.length; y++) {
+		for (let x = 0; x < msr.length; x++) {
+			const sum = msr[x].m + ksr[y].k;
+			console.log(msr[x].m, '+', ksr[y].k, '=', sum, 'min: ' + min, x, y);
+			if (sum > 0 && sum >= min) {
+				i = x - 1;
+				// i = x - ((y == 0) ? 1 : 0);
+				j = y;
+				break outerLoop;
+			}
+		}
+	}
+	return { i, j };
+}
+
+export function searchEnd(
+	max: number,
+	msr: { m: number, mi: number }[],
+	ksr: { k: number, ki: number }[]): { i: number, j: number } {
+
+	let i = -1, j = -1;
+
+	outerLoop:
+	for (let y = ksr.length - 1; y >= 0; y--) {
+		for (let x = msr.length - 1; x >= 0; x--) {
+			const sum = msr[x].m + ksr[y].k;
+			console.log(msr[x].m, '+', ksr[y].k, '=', sum, 'max: ' + max, x, y);
+			if (sum > 0 && sum <= max) {
+				i = x + 1;
+				j = y;
+				// j = y + ((y === ksr.length - 1) ? 0 : 1);
+				break outerLoop;
+			}
+		}
+	}
+	return { i, j };
 }
 

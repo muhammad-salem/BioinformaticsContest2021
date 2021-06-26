@@ -6,7 +6,7 @@ export type GroupIndex = { mj: { m: number, mi: number }, kj: { k: number, ki: n
 
 export const ARRAY_LIMIT = Math.pow(2, 26) - 1;
 
-export const OBJECT_LIMIT = Math.pow(2, 20) - 1;
+export const OBJECT_LIMIT = Math.pow(2, 18) - 1;
 
 export class MultiArray {
 
@@ -109,13 +109,16 @@ export class MultiArray {
 		if (index === sum.length) {
 			return [sum[sum.length - 1]];
 		}
+		if (sum[index].sum === signal) {
+			return [sum[index]];
+		}
 		const before = sum[index - 1];
 		const after = sum[index];
 		return [before, after];
 	}
 
 	findInSum(sum: GroupIndex[], n: number) {
-		console.log('== search: ' + n);
+		// console.log('== search: ' + n);
 		const temp = { sum: n };
 		const index = sortedIndexBy(sum, temp, 'sum');
 		return this.searchInArray(n, index, sum);
