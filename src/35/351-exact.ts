@@ -25,22 +25,22 @@ export function solve3523Exact() {
 	testLoop:
 	for (let i = 0; i < testCount; i++) {
 		const test = input[lastLine++];
-		const fullExp = new RegExp(test, 'g');
-		for (let j = 0; j < paths.length; j++) {
-			if (fullExp.test(paths[j])) {
-				const length = test.split(',').length;
-				console.log('found full', j, length);
-				appendOutput(`${j} ${length}\n`);
-				continue testLoop;
-			}
-		}
-		const reg = test.substring(test.indexOf('-'), test.lastIndexOf('-'));
+		// const fullExp = new RegExp(test, 'g');
+		// for (let j = 0; j < paths.length; j++) {
+		// 	if (fullExp.test(paths[j])) {
+		// 		const length = test.split(',').length;
+		// 		console.log('found full', j, length);
+		// 		appendOutput(`${j} ${length}\n`);
+		// 		continue testLoop;
+		// 	}
+		// }
+		const reg = test.substring(test.indexOf('-'), test.lastIndexOf('-') + 1);
 		const betweenExp = new RegExp(reg, 'g');
 		for (let j = 0; j < paths.length; j++) {
 			if (betweenExp.test(paths[j])) {
-				const length = test.split(',').length - 2;
-				console.log('found between', j, length);
-				appendOutput(`${j} ${length}\n`);
+				// const length = test.split(',').length - 2;
+				console.log('found between', j);
+				appendOutput(`${j} 1\n`);
 				continue testLoop;
 			}
 		}
