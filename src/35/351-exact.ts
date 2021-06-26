@@ -25,19 +25,29 @@ export function solve3523Exact() {
 	testLoop:
 	for (let i = 0; i < testCount; i++) {
 		const test = input[lastLine++];
-		const regExp = new RegExp(test, 'g');
+		const reg = test.substring(test.indexOf('-'), test.lastIndexOf('-'));
+		const fullExp = new RegExp(test, 'g');
 		inner:
 		for (let i = 0; i < paths.length; i++) {
 			const path = paths[i];
-
-			let regexArray = regExp.exec(path);
-			if (regexArray) {
+			if (fullExp.test(path)) {
 				const length = test.split(',').length;
-				appendOutput(`${(i > 0) ? '\n' : ''}${i} ${length}`);
-				break inner;
+				console.log('found', i);
+				appendOutput(`${i} ${length}\n`);
+				continue testLoop;
 			}
-			appendOutput(`${(i > 0) ? '\n' : ''}-1 0`);
 		}
+		const betweenExp = new RegExp(reg, 'g');
+		for (let i = 0; i < paths.length; i++) {
+			const path = paths[i];
+			if (betweenExp.test(path)) {
+				const length = test.split(',').length - 2;
+				console.log('found', i);
+				appendOutput(`${i} ${length}\n`);
+				continue testLoop;
+			}
+		}
+		appendOutput(`-1 0\n`);
 	}
 }
 
