@@ -28,21 +28,41 @@ export function solve351() {
 
 		let index = -1;
 
+		whileLoop:
 		do {
 			const match = findFirstMatch(++index, delta, test, paths);
 			if (match.index === -1) {
 				appendOutput('-1 0\n');
 				continue testLoop;
 			}
-			index = match.index;
 			const isoForm = match.isoForm!;
 			let matchCount = isFullMatching(delta, test[0], isoForm[0]) ? 1 : 0;
 
-			for (let j = 1; j < test.length; j++) {
+			const pathMather: 'full' | 'start' = isoForm.length > test.length ? 'full' : 'start';
+
+			for (let j = 1; j < test.length && j < isoForm.length; j++) {
 				const isFull = isFullMatching(delta, test[j], isoForm[j]);
 				isFull ? matchCount++ : void 0;
+
+				if (!isFull) {
+					if (j < test.length - 1) {
+						if (!isNotFullMatching(delta, test[j], isoForm[j])) {
+							index = match.index;
+							continue whileLoop;
+						}
+					} else if (j == test.length - 1) {
+						if (pathMather === 'start' && !isStartMatching(delta, test[j], isoForm[j])) {
+							index = match.index;
+							continue whileLoop;
+						} else if (pathMather === 'full' && !isFullMatching(delta, test[j], isoForm[j])) {
+							index = match.index;
+							continue whileLoop;
+						}
+					}
+				}
 			}
-			appendOutput(`${index} ${matchCount}\n`);
+			appendOutput(`${match.index} ${matchCount}${(i < testCount - 1) ? '\n' : ''}`);
+
 			continue testLoop;
 		} while (index <= paths.length);
 	}
@@ -51,7 +71,11 @@ export function solve351() {
 export function findFirstMatch(index: number, delta: number, tests: [number, number][], isoForms: [number, number][][]) {
 	for (; index < isoForms.length; index++) {
 		const isoForm = isoForms[index];
+		if (isoForm.length < tests.length) {
+			continue;
+		}
 		if (isEndMatching(delta, tests[0], isoForm[0]) && isStartMatching(delta, tests[1], isoForm[1])) {
+
 			return { index, isoForm };
 		}
 	}
@@ -69,6 +93,10 @@ export function isEndMatching(delta: number, test: [number, number], isoForm: [n
 
 export function isFullMatching(delta: number, test: [number, number], isoForm: [number, number]) {
 	return isMatching(0, delta, test, isoForm) && isMatching(1, delta, test, isoForm);
+}
+
+export function isNotFullMatching(delta: number, test: [number, number], isoForm: [number, number]) {
+	return !isMatching(0, delta, test, isoForm) || !isMatching(1, delta, test, isoForm);
 }
 
 export function isMatching(index: number, delta: number, test: [number, number], isoForm: [number, number]) {
