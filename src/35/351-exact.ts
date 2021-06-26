@@ -5,7 +5,7 @@ const { max, find, uniq, sortedIndexBy } = lodash;
 
 export type Contact = { a: number, b: number, p: number };
 
-export function solve351() {
+export function solve3523Exact() {
 
 	const input = readInput().split('\n').map(s => s.trim());
 
@@ -13,9 +13,9 @@ export function solve351() {
 	input.splice(0, 1);
 
 	let lastLine = 0;
-	const paths: [number, number][][] = new Array(n);
+	const paths: string[] = new Array(n);
 	for (let i = 0; i < n; i++) {
-		paths[i] = input[lastLine++].split(',').map(s => s.split('-').map(Number)) as [number, number][];
+		paths[i] = input[lastLine++];
 	}
 
 	const testCount = Number(input[lastLine++]);
@@ -24,48 +24,20 @@ export function solve351() {
 	writeOutput('');
 	testLoop:
 	for (let i = 0; i < testCount; i++) {
-		const test = input[lastLine++].split(',').map(s => s.split('-').map(Number)) as [number, number][];
+		const test = input[lastLine++];
+		const regExp = new RegExp(test, 'g');
+		inner:
+		for (let i = 0; i < paths.length; i++) {
+			const path = paths[i];
 
-		let index = -1;
-
-		whileLoop:
-		do {
-			const match = findFirstMatch(++index, delta, test, paths);
-			if (match.index === paths.length) {
-				appendOutput(`${(i > 0) ? '\n' : ''}-1 0`);
-				continue testLoop;
+			let regexArray = regExp.exec(path);
+			if (regexArray) {
+				const length = test.split(',').length;
+				appendOutput(`${(i > 0) ? '\n' : ''}${i} ${length}`);
+				break inner;
 			}
-			const isoForm = match.isoForm!;
-			// start match
-			let matchCount = isFullMatching(delta, test[0], isoForm[match.start!]) ? 1 : 0;
-			// end match
-			const se = isStartMatching(delta, test[test.length - 1], isoForm[match.start! + test.length - 1]);
-			if (!se) {
-				// not match, break chain
-				index = match.index;
-				continue whileLoop;
-			}
-			const ee = isEndMatching(delta, test[test.length - 1], isoForm[match.start! + test.length - 1]);
-			if (ee) {
-				matchCount++;
-			}
-
-			for (let j = 1, s = match.start! + 1; j < test.length - 1 && s < isoForm.length - 1; j++, s++) {
-				const isFull = isFullMatching(delta, test[j], isoForm[s]);
-				if (isFull) {
-					matchCount++;
-				} else {
-					// not match, break chain
-					index = match.index;
-					continue whileLoop;
-				}
-			}
-			if (matchCount == 0) {
-				continue whileLoop;
-			}
-			appendOutput(`${(i > 0) ? '\n' : ''}${match.index} ${matchCount}`);
-			continue testLoop;
-		} while (index <= paths.length);
+			appendOutput(`${(i > 0) ? '\n' : ''}-1 0`);
+		}
 	}
 }
 
