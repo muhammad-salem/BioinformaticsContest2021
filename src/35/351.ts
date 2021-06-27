@@ -27,7 +27,7 @@ export function solve351() {
 		const test = input[lastLine++].split(',').map(s => s.split('-').map(Number)) as [number, number][];
 
 		const match = searchIndex(delta, test, paths);
-		console.log(match, i, testCount - i);
+		console.log(match.index, match.count);
 
 		appendOutput(`${match.index} ${match.count}\n`);
 	}
@@ -38,25 +38,12 @@ export function searchIndex(delta: number, test: [number, number][], isoForms: [
 	for (let index = 0; index < isoForms.length; index++) {
 		const isoForm = isoForms[index];
 		for (let x = 0; x < isoForm.length; x++) {
-			if (isInBlock(delta, test[0], isoForm[x])) {
-				const count = getMatchCount(delta, test, isoForm, x);
-				if (count > 0) {
-					return { index, count };
-				}
-				continue fullSearch;
-			}
-		}
-	}
-	anySearch:
-	for (let index = 0; index < isoForms.length; index++) {
-		const isoForm = isoForms[index];
-		for (let x = 0; x < isoForm.length; x++) {
 			if (isEndInBlock(delta, test[0], isoForm[x])) {
 				const count = getMatchCount(delta, test, isoForm, x);
 				if (count > 0 || (count == 0 && test.length == 2)) {
 					return { index, count };
 				}
-				continue anySearch;
+				continue fullSearch;
 			}
 		}
 	}
@@ -67,35 +54,19 @@ export function getMatchCount(delta: number, test: [number, number][], isoForms:
 	if (test.length > isoForms.length - start) {
 		return 0;
 	}
-	let matchCount = 0;
-	for (let i = 0, x = start; i < test.length; i++, x++) {
-		const testBlock = test[i];
-		const isoBlock = isoForms[x];
-		if (i == 0) {
-			if (isInBlock(delta, testBlock, isoBlock)) {
-				matchCount++;
-				continue;
-			}
-			if (isEndInBlock(delta, testBlock, isoBlock)) {
-				continue;
-			}
-			return 0;
-		} else if (i < test.length - 1) {
-			if (isInBlock(delta, testBlock, isoBlock)) {
-				matchCount++;
-				continue;
-			}
-			return 0;
-		} else if (i == test.length - 1) {
-			if (isInBlock(delta, testBlock, isoBlock)) {
-				matchCount++;
-				break;
-			}
-			if (isStartInBlock(delta, testBlock, isoBlock)) {
-				break;
-			}
-			return 0;
+
+	let matchCount = isInBlock(delta, test[0], isoForms[0]) ? 1 : 0;
+	if (isInBlock(delta, test[test.length - 1], isoForms[isoForms.length - 1 - start])) {
+		matchCount++;
+	} else if (!isStartInBlock(delta, test[test.length - 1], isoForms[start + test.length - 1])) {
+		return 0;
+	}
+	for (let i = 1, x = start + 1, l = test.length - 1; i < l; i++, x++) {
+		if (isInBlock(delta, test[i], isoForms[x])) {
+			matchCount++;
+			continue;
 		}
+		return 0;
 	}
 	return matchCount;
 }
