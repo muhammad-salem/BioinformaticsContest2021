@@ -9,12 +9,14 @@
 			"request": "launch",
 			"name": "Launch Program 351",
 			"program": "${workspaceFolder}/src/index.ts",
-			"preLaunchTask": "tsc: build - tsconfig.json",
+			"preLaunchTask_disable": "tsc: build - tsconfig.json",
 			"outFiles": [
 				"${workspaceFolder}/dist/**/*.js"
 			],
 			"args": [
-				"5-easy/00"
+				// "5-easy/00",
+				// "5-easy/10-welcome",
+				"5-easy/20-mouse-simple-exact"
 			]
 		}
 	]
