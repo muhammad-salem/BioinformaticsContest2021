@@ -37,7 +37,13 @@ export function searchIndex(delta: number, test: [number, number][], isoForms: [
 	fullSearch:
 	for (let index = 0; index < isoForms.length; index++) {
 		const isoForm = isoForms[index];
+		if (isoForm.length < test.length) {
+			continue;
+		}
 		for (let x = 0; x < isoForm.length; x++) {
+			if (isoForm.length - x < test.length) {
+				continue fullSearch;
+			}
 			if (isEndInBlock(delta, test[0], isoForm[x])) {
 				const count = getMatchCount(delta, test, isoForm, x);
 				if (count > 0 || (count == 0 && test.length == 2)) {
