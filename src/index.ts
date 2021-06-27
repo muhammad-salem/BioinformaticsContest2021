@@ -41,7 +41,7 @@ switch (problemName) {
 		solve341(); break;
 	case '5-easy/20-mouse-simple-exact':
 	case '5-easy/30-mouse-exact':
-		solve3523Exact(); break;
+	// solve3523Exact(); break;
 	case '5-easy/00':
 	case '5-easy/10-welcome':
 	case '5-easy/35-mouse-inexact':

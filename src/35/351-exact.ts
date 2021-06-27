@@ -20,42 +20,28 @@ export function solve3523Exact() {
 
 	const testCount = Number(input[lastLine++]);
 
-	// console.log(testCount, n, delta, paths);
 	writeOutput('');
 	for (let i = 0; i < testCount; i++) {
 		const test = input[lastLine++];
-		// let regExp = new RegExp(test, 'g');
-		// let found = testRegex(regExp, paths);
-		// if (found) {
-		// 	console.log('found full');
-		// 	continue;
-		// }
-		// // let reg = test.substring(0, test.lastIndexOf('-') + 1);
-		// // regExp = new RegExp(reg, 'g');
-		// // found = testRegex(regExp, paths);
-		// // if (found) {
-		// // 	console.log('found start');
-		// // 	continue;
-		// // }
+		let index = getIndexOf(test, paths);
+		if (index >= 0) {
+			console.log('found full', index, i, testCount - i);
+			appendOutput(`${index} 1\n`);
+			continue;
+		}
+		const start = test.substring(test.indexOf('-'));
+		index = getIndexOf(start, paths);
+		if (index >= 0) {
+			console.log('found no start', index, i, testCount - i);
+			appendOutput(`${index} 1\n`);
+			continue;
+		}
 
-		// let reg = test.substring(test.indexOf('-'));
-		// regExp = new RegExp(reg, 'g');
-		// found = testRegex(regExp, paths);
-		// if (found) {
-		// 	console.log('found end');
-		// 	continue;
-		// }
-
-		// reg = test.substring(test.indexOf('-'), test.lastIndexOf('-') + 1);
-		// regExp = new RegExp(reg, 'g');
-		// found = testRegex(regExp, paths);
-		// if (found) {
-		// 	console.log('found between');
-		// 	continue;
-		// }
-
-		if (pathContains(paths, test)) {
-			console.log('found');
+		const between = test.substring(test.indexOf('-'), test.lastIndexOf('-') + 1);
+		index = getIndexOf(between, paths);
+		if (index >= 0) {
+			console.log('found between', index, i, testCount - i);
+			appendOutput(`${index} 1\n`);
 			continue;
 		}
 		console.log('not found', i);
@@ -75,31 +61,27 @@ function testRegex(reg: RegExp, paths: string[]) {
 
 function pathContains(paths: string[], test: string) {
 	const full = test;
+
+	let index = getIndexOf(full, paths);
+	if (index >= 0) {
+		appendOutput(`${index} 1\n`);
+		return true;
+	}
 	const start = test.substring(test.indexOf('-'));
-	const between = test.substring(test.indexOf('-'), test.lastIndexOf('-') + 1);
-
-	// const fullIndex = 0, startIndex = 0, betweenIndex = 0;
-
-
-	const indexs = [getIndexOf(full, paths), getIndexOf(start, paths), getIndexOf(between, paths)].filter(n => n >= 0);
-
-	let mn = min(indexs)!;
-
-	console.log(indexs, mn);
-
-
-	if (mn || mn >= 0) {
-		appendOutput(`${mn} 1\n`);
+	index = getIndexOf(start, paths);
+	if (index >= 0) {
+		appendOutput(`${index} 1\n`);
 		return true;
 	}
 
-
-	// for (let j = 0; j < paths.length; j++) {
-	// 	if (pathIncludes(paths[j], test)) {
-	// 		appendOutput(`${j} 1\n`);
-	// 		return true;
-	// 	}
-	// }
+	const between = test.substring(test.indexOf('-'), test.lastIndexOf('-') + 1);
+	index = getIndexOf(between, paths);
+	if (index >= 0) {
+		appendOutput(`${index} 1\n`);
+		return true;
+	}
+	console.log('not found');
+	appendOutput(`-1 0\n`);
 	return false;
 }
 
