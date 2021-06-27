@@ -46,7 +46,7 @@ export function searchIndex(delta: number, test: [number, number][], isoForms: [
 			}
 			if (isEndInBlock(delta, test[0], isoForm[x])) {
 				const count = getMatchCount(delta, test, isoForm, x);
-				if (count > 0 || (count == 0 && test.length == 2)) {
+				if (count > 0) {
 					return { index, count };
 				}
 				continue fullSearch;
@@ -57,12 +57,9 @@ export function searchIndex(delta: number, test: [number, number][], isoForms: [
 }
 
 export function getMatchCount(delta: number, test: [number, number][], isoForms: [number, number][], start: number) {
-	if (test.length > isoForms.length - start) {
-		return 0;
-	}
 
-	let matchCount = isInBlock(delta, test[0], isoForms[0]) ? 1 : 0;
-	if (isInBlock(delta, test[test.length - 1], isoForms[isoForms.length - 1 - start])) {
+	let matchCount = isInBlock(delta, test[0], isoForms[start]) ? 1 : 0;
+	if (isInBlock(delta, test[test.length - 1], isoForms[start + test.length - 1])) {
 		matchCount++;
 	} else if (!isStartInBlock(delta, test[test.length - 1], isoForms[start + test.length - 1])) {
 		return 0;
