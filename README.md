@@ -10,6 +10,21 @@ More information about the contest can be found at this [link](https://stepik.or
 tsc
 ```
 
+## Deal with memory for node
+
+ - for node
+	```sh
+	export NODE_OPTIONS="--max-old-space-size=24384"
+	```
+
+ - for linux (apt/debian/ubuntu)
+	```sh
+	sudo apt install zram-tools zram-config 
+	sudo zramctl -f -s 30GB
+	sudo  mkswap /dev/zram1
+	sudo swapon -p 5 /dev/zram1
+	```
+
 
 ## Qualification Round
 
