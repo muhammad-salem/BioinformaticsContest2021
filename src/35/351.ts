@@ -3,7 +3,7 @@ import {
 	inputFile, readInput, writeOutput,
 	resolveCacheFile, writeDataToFile, appendDataToFile
 } from '../read.js';
-import { parentPort, workerData, isMainThread, Worker } from 'worker_threads';
+import { parentPort, workerData, isMainThread, Worker, threadId } from 'worker_threads';
 import { StaticPool } from 'node-worker-threads-pool';
 
 import lodash from 'lodash';
@@ -43,7 +43,7 @@ export function solve351() {
 			limit = testCount;
 		}
 		const param = { start, limit, index };
-		console.log(param);
+		console.log(threadId, param);
 		staticPool.exec(param).then((result: { index: number, output: string }) => {
 			resultFiles.push(result);
 			console.log('result from thread pool:', result);
@@ -63,8 +63,6 @@ export function solve351() {
 }
 
 if (!isMainThread) {
-	console.log({ workerData });
-
 	const input = readDataFromFile(workerData.file).split('\n').map(s => s.trim());
 
 	const [n, delta] = input[0].split(' ').map(Number);
@@ -81,10 +79,14 @@ if (!isMainThread) {
 			);
 	}
 	const testCount = Number(input[lastLine++]);
+	console.log(threadId, n, isoForms.length, delta, testCount);
+
 	parentPort!.on('message', param => workerThread(input, isoForms, delta, lastLine, param.start, param.limit, param.index));
 }
 
 export function workerThread(input: string[], isoForms: IsoForm[], delta: number, lastLine: number, start: number, limit: number, index: number) {
+
+	console.log('==start== ', threadId, index, start, limit, isoForms.length, delta);
 
 	lastLine += start;
 	const output = resolveCacheFile('easy-' + index + '.txt');
@@ -99,6 +101,7 @@ export function workerThread(input: string[], isoForms: IsoForm[], delta: number
 
 		appendDataToFile(output, `${match.index} ${match.count}\n`);
 	}
+	console.log('==end== ', threadId, index, start, limit, isoForms.length, delta);
 	parentPort?.postMessage({ index, output });
 	// return { index, output };
 }
