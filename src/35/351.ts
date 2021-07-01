@@ -42,6 +42,7 @@ export function solve351() {
 			limit = testCount;
 		}
 		const param = { file: inputFile, start, limit, index };
+		console.log(param);
 		staticPool.exec(param).then((result: { index: number, output: string }) => {
 			resultFiles.push(result);
 			console.log('result from thread pool:', result);
@@ -64,7 +65,7 @@ if (!isMainThread) {
 	parentPort!.on('message', param => workerThread(param.file, param.start, param.limit, param.index));
 }
 
-export function workerThread(this: any, file: string, start: number, limit: number, index: number) {
+export function workerThread(file: string, start: number, limit: number, index: number) {
 
 	const input = readDataFromFile(file).split('\n').map(s => s.trim());
 
@@ -83,6 +84,7 @@ export function workerThread(this: any, file: string, start: number, limit: numb
 	}
 
 	const testCount = Number(input[lastLine++]);
+	lastLine += start;
 	const output = resolveCacheFile('easy-' + index + '.txt');
 
 	writeDataToFile(output, '');
@@ -91,7 +93,7 @@ export function workerThread(this: any, file: string, start: number, limit: numb
 		const test = input[lastLine++].split(',').map(s => s.split('-').map(Number)) as [number, number][];
 
 		const match = findBestMath(delta, test, isoForms);
-		console.log(i, testCount - i, match.index, match.count);
+		// console.log(i, testCount - i, match.index, match.count);
 
 		appendDataToFile(output, `${match.index} ${match.count}\n`);
 	}
