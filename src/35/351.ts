@@ -58,9 +58,9 @@ export function findBestMath(delta: number, test: [number, number][], isoForms: 
 			}
 			if (isReadMatchIsoFormByDelta(test[0], isoForm[x])) {
 				if (isReadMatchIsoForm(delta, test, isoForm, x)) {
-					if (delta == 0) {
-						return { index, count: 1 };
-					}
+					// if (delta == 0) {
+					// 	return { index, count: 1 };
+					// }
 					matches.push(index);
 				}
 				continue fullSearch;
