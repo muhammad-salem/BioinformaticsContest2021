@@ -24,13 +24,14 @@ export function solve351() {
 	const testCount = Number(input[n + 1]);
 	input = undefined;
 
-	const threadLimit = Math.pow(10, 4);
+	const threadLimit = Math.pow(10, 3);
 
 
 	const workerCount = ((testCount - (testCount % threadLimit)) / threadLimit) + ((testCount % threadLimit) > 0 ? 1 : 0);
 
 	const staticPool = new StaticPool({
-		size: 8,
+		size: 5,
+		workerData: { file: inputFile },
 		task: './dist/35/351.js' //workerThread
 	});
 
@@ -41,7 +42,7 @@ export function solve351() {
 		if (limit > testCount) {
 			limit = testCount;
 		}
-		const param = { file: inputFile, start, limit, index };
+		const param = { start, limit, index };
 		console.log(param);
 		staticPool.exec(param).then((result: { index: number, output: string }) => {
 			resultFiles.push(result);
@@ -62,12 +63,9 @@ export function solve351() {
 }
 
 if (!isMainThread) {
-	parentPort!.on('message', param => workerThread(param.file, param.start, param.limit, param.index));
-}
+	console.log({ workerData });
 
-export function workerThread(file: string, start: number, limit: number, index: number) {
-
-	const input = readDataFromFile(file).split('\n').map(s => s.trim());
+	const input = readDataFromFile(workerData.file).split('\n').map(s => s.trim());
 
 	const [n, delta] = input[0].split(' ').map(Number);
 
@@ -82,8 +80,12 @@ export function workerThread(file: string, start: number, limit: number, index: 
 				.map(m => ({ start: m - delta, num: m, end: m + delta })) as Coordinate
 			);
 	}
-
 	const testCount = Number(input[lastLine++]);
+	parentPort!.on('message', param => workerThread(input, isoForms, delta, lastLine, param.start, param.limit, param.index));
+}
+
+export function workerThread(input: string[], isoForms: IsoForm[], delta: number, lastLine: number, start: number, limit: number, index: number) {
+
 	lastLine += start;
 	const output = resolveCacheFile('easy-' + index + '.txt');
 
