@@ -4,9 +4,8 @@ import lodash from 'lodash';
 import { type } from 'os';
 const { min, max, find, uniq, sortedIndexBy } = lodash;
 
-export type Contact = { a: number, b: number, p: number };
 
-export type Cell = { start: number; end: number; };
+export type Cell = { start: number; num: number, end: number; };
 
 export type Coordinate = [Cell, Cell];
 export type IsoForm = Coordinate[];
@@ -27,7 +26,7 @@ export function solve351() {
 			.map(s => s
 				.split('-')
 				.map(Number)
-				.map(m => ({ start: m - delta, end: m + delta })) as Coordinate
+				.map(m => ({ start: m - delta, num: m, end: m + delta })) as Coordinate
 			);
 	}
 
@@ -39,7 +38,7 @@ export function solve351() {
 		const test = input[lastLine++].split(',').map(s => s.split('-').map(Number)) as [number, number][];
 
 		const match = findBestMath(delta, test, isoForms);
-		console.log(match.index, match.count);
+		console.log(i, testCount - i, match.index, match.count);
 
 		appendOutput(`${match.index} ${match.count}\n`);
 	}
@@ -57,8 +56,11 @@ export function findBestMath(delta: number, test: [number, number][], isoForms: 
 			if (isoForm.length - x < test.length) {
 				continue fullSearch;
 			}
-			if (isInBlockNoDelta(test[0], isoForm[x])) {
-				if (getMatchCount(test, isoForm, x)) {
+			if (isReadMatchIsoFormByDelta(test[0], isoForm[x])) {
+				if (isReadMatchIsoForm(delta, test, isoForm, x)) {
+					if (delta == 0) {
+						return { index, count: 1 };
+					}
 					matches.push(index);
 				}
 				continue fullSearch;
@@ -71,24 +73,34 @@ export function findBestMath(delta: number, test: [number, number][], isoForms: 
 	return { index: min(matches), count: matches.length };
 }
 
-export function getMatchCount(test: [number, number][], isoForm: IsoForm, start: number) {
-	for (let i = 0, x = start, l = test.length; i < l; i++, x++) {
+export function isReadMatchIsoForm(delta: number, test: [number, number][], isoForm: IsoForm, start: number) {
+	for (let i = 1, x = start + 1, l = test.length - 1; i < l; i++, x++) {
 		if (!isInBlockNoDelta(test[i], isoForm[x])) {
 			return false;
 		}
 	}
-	return true;
+	const lastTest = test[test.length - 1], lastIsoForm = isoForm[start + test.length - 1];
+	if (Math.abs(lastTest[0] - lastIsoForm[0].num) <= delta) {
+		if (lastTest[1] <= (lastIsoForm[1].num + delta)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+export function isReadMatchIsoFormByDelta(test: [number, number], isoForm: Coordinate) {
+	return test[0] >= isoForm[0].start && inRangeOfCellEnd(test, isoForm);
 }
 
 export function isInBlockNoDelta(test: [number, number], isoForm: Coordinate) {
-	return inRangeOfCellStart(test, isoForm) && inRangeOfCellEnd(test, isoForm)
+	return inRangeOfCellStart(test, isoForm) && inRangeOfCellEnd(test, isoForm);
 }
 
 export function inRangeOfCellStart(test: [number, number], isoForm: Coordinate) {
-	return test[0] >= isoForm[0].start && test[0] <= isoForm[0].end
+	return test[0] >= isoForm[0].start && test[0] <= isoForm[0].end;
 }
 
 export function inRangeOfCellEnd(test: [number, number], isoForm: Coordinate) {
-	return test[1] >= isoForm[1].start && test[1] <= isoForm[1].end
+	return test[1] >= isoForm[1].start && test[1] <= isoForm[1].end;
 }
 
