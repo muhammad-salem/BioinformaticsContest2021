@@ -1,8 +1,14 @@
-import { appendOutput, readInfo, readInput, writeOutput } from '../read.js';
+import {
+	appendOutput, readDataFromFile, readInfo,
+	inputFile, readInput, writeOutput,
+	resolveCacheFile, writeDataToFile, appendDataToFile
+} from '../read.js';
+import { parentPort, workerData, isMainThread, Worker } from 'worker_threads';
+import { StaticPool } from 'node-worker-threads-pool';
 
 import lodash from 'lodash';
-import { type } from 'os';
-const { min, max, find, uniq, sortedIndexBy } = lodash;
+const { min, sortBy, max, find, uniq, sortedIndexBy } = lodash;
+
 
 
 export type Cell = { start: number; num: number, end: number; };
@@ -11,14 +17,60 @@ export type Coordinate = [Cell, Cell];
 export type IsoForm = Coordinate[];
 
 
-export function solve351() {
 
-	const input = readInput().split('\n').map(s => s.trim());
+export function solve351() {
+	let input: string[] | undefined = readDataFromFile(inputFile).split('\n').map(s => s.trim());
+	const [n, delta] = input[0].split(' ').map(Number);
+	const testCount = Number(input[n + 1]);
+	input = undefined;
+
+	const threadLimit = Math.pow(10, 4);
+
+
+	const workerCount = ((testCount - (testCount % threadLimit)) / threadLimit) + ((testCount % threadLimit) > 0 ? 1 : 0);
+
+	const staticPool = new StaticPool({
+		size: 8,
+		task: './dist/35/351.js' //workerThread
+	});
+
+	const resultFiles: { index: number; output: string; }[] = [];
+	for (let index = 0; index < workerCount; index++) {
+		const start = threadLimit * index;
+		let limit = threadLimit * (index + 1);
+		if (limit > testCount) {
+			limit = testCount;
+		}
+		const param = { file: inputFile, start, limit, index };
+		staticPool.exec(param).then((result: { index: number, output: string }) => {
+			resultFiles.push(result);
+			console.log('result from thread pool:', result);
+			if (resultFiles.length === workerCount) {
+				const files = sortBy(resultFiles, 'index').map(r => r.output);
+				console.log(files);
+
+				writeOutput('');
+				for (const file of files) {
+					const data = readDataFromFile(file);
+					appendOutput(data);
+				}
+				staticPool.destroy();
+			}
+		})
+	}
+}
+
+if (!isMainThread) {
+	parentPort!.on('message', param => workerThread(param.file, param.start, param.limit, param.index));
+}
+
+export function workerThread(this: any, file: string, start: number, limit: number, index: number) {
+
+	const input = readDataFromFile(file).split('\n').map(s => s.trim());
 
 	const [n, delta] = input[0].split(' ').map(Number);
-	input.splice(0, 1);
 
-	let lastLine = 0;
+	let lastLine = 1;
 	const isoForms: IsoForm[] = new Array(n);
 	for (let i = 0; i < n; i++) {
 		isoForms[i] = input[lastLine++]
@@ -31,17 +83,20 @@ export function solve351() {
 	}
 
 	const testCount = Number(input[lastLine++]);
+	const output = resolveCacheFile('easy-' + index + '.txt');
 
-	writeOutput('');
+	writeDataToFile(output, '');
 	testLoop:
-	for (let i = 0; i < testCount; i++) {
+	for (let i = start; i < limit; i++) {
 		const test = input[lastLine++].split(',').map(s => s.split('-').map(Number)) as [number, number][];
 
 		const match = findBestMath(delta, test, isoForms);
 		console.log(i, testCount - i, match.index, match.count);
 
-		appendOutput(`${match.index} ${match.count}\n`);
+		appendDataToFile(output, `${match.index} ${match.count}\n`);
 	}
+	parentPort?.postMessage({ index, output });
+	// return { index, output };
 }
 
 export function findBestMath(delta: number, test: [number, number][], isoForms: IsoForm[]) {

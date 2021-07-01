@@ -43,6 +43,10 @@ export function writeCache(fileName: string, data: string) {
 	return file;
 }
 
+export function resolveCacheFile(fileName: string) {
+	return resolve(cacheDir, fileName);
+}
+
 
 export function appendOutput(data: string) {
 	appendFileSync(outputFile, data);
@@ -51,6 +55,10 @@ export function appendOutput(data: string) {
 
 export function writeDataToFile(fileName: string, data: string) {
 	writeFileSync(fileName, data);
+}
+
+export function appendDataToFile(fileName: string, data: string) {
+	appendFileSync(fileName, data);
 }
 
 export function readDataFromFile(fileName: string) {
