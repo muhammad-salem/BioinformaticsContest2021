@@ -1,7 +1,8 @@
 import {
 	appendOutput, readDataFromFile, readInfo,
 	inputFile, readInput, writeOutput,
-	resolveCacheFile, writeDataToFile, appendDataToFile
+	resolveCacheFile, writeDataToFile,
+	appendDataToFile, readLines
 } from '../read.js';
 import { parentPort, workerData, isMainThread, Worker, threadId } from 'worker_threads';
 import { StaticPool } from 'node-worker-threads-pool';
@@ -16,10 +17,8 @@ export type Cell = { start: number; num: number, end: number; };
 export type Coordinate = [Cell, Cell];
 export type IsoForm = Coordinate[];
 
-
-
 export function solve351() {
-	let input: string[] | undefined = readDataFromFile(inputFile).split('\n').map(s => s.trim());
+	let input: string[] | undefined = readLines(inputFile);
 	const [n, delta] = input[0].split(' ').map(Number);
 	const testCount = Number(input[n + 1]);
 	input = undefined;
@@ -114,6 +113,9 @@ export function findBestMath(delta: number, test: [number, number][], isoForms: 
 		if (isoForm.length < test.length) {
 			continue;
 		}
+		if (isBeyondStart(test[0], isoForm[0])) {
+			break fullSearch;
+		}
 		for (let x = 0; x < isoForm.length; x++) {
 			if (isoForm.length - x < test.length) {
 				continue fullSearch;
@@ -166,3 +168,10 @@ export function inRangeOfCellEnd(test: [number, number], isoForm: Coordinate) {
 	return test[1] >= isoForm[1].start && test[1] <= isoForm[1].end;
 }
 
+export function isBeyondStart(test: [number, number], isoForm: Coordinate) {
+	return test[0] < isoForm[0].start;
+}
+
+// export function findMinStart(point: number, isoForms: IsoForm[]) {
+
+// }

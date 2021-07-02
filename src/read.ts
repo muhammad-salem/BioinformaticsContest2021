@@ -65,6 +65,14 @@ export function readDataFromFile(fileName: string) {
 	return readFileSync(fileName, 'utf-8');
 }
 
+export function readLines(filePath: string) {
+	return readDataFromFile(filePath).split('\n').map(s => s.trim());
+}
+
+export function readInputLines() {
+	return readDataFromFile(inputFile).split('\n').map(s => s.trim());
+}
+
 export const cacheFile = resolve(process.cwd(), 'outputs', `cache-${problemName}.txt`);
 
 export function openCacheFile() {
