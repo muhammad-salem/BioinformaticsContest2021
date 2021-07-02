@@ -54,7 +54,7 @@ export function solve351() {
 	const workerCount = ((testCount - (testCount % threadLimit)) / threadLimit) + ((testCount % threadLimit) > 0 ? 1 : 0);
 
 	const staticPool = new StaticPool({
-		size: 1,
+		size: 5,
 		workerData: { file: cacheInput },
 		task: './dist/35/351.js' //workerThread
 	});
@@ -70,7 +70,7 @@ export function solve351() {
 		// console.log(threadId, param);
 		staticPool.exec(param).then((result: { index: number, output: string }) => {
 			resultFiles.push(result);
-			console.log('finish', result.index, result.output);
+			console.log('finish', resultFiles.length, 'of', workerCount, '==>', result.index, result.output);
 			if (resultFiles.length === workerCount) {
 				const files = sortBy(resultFiles, 'index').map(r => r.output);
 				console.log('concat files', files.length);
@@ -112,7 +112,7 @@ if (!isMainThread) {
 
 export function workerThread(input: string[], isoForms: { index: number, isoForm: IsoForm }[], delta: number, lastLine: number, start: number, limit: number, index: number) {
 
-	console.log('==start==', { threadId, index, start, limit, ifl: isoForms.length, delta });
+	// console.log('==start==', { threadId, index, start, limit, ifl: isoForms.length, delta });
 
 	lastLine += start;
 	const output = resolveCacheFile('easy-' + index + '.txt');
@@ -128,7 +128,7 @@ export function workerThread(input: string[], isoForms: { index: number, isoForm
 
 		appendDataToFile(output, `${match.index} ${match.count}\n`);
 	}
-	console.log('==end== ', threadId, index, start, limit, isoForms.length, delta);
+	// console.log('==end== ', threadId, index, start, limit, isoForms.length, delta);
 	parentPort?.postMessage({ index, output });
 	// return { index, output };
 }
