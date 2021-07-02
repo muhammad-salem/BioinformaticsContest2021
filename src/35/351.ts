@@ -1,15 +1,14 @@
 import {
 	appendOutput, readDataFromFile, readInfo,
 	inputFile, readInput, writeOutput,
-	resolveCacheFile, writeDataToFile, appendDataToFile, readLines
+	resolveCacheFile, writeDataToFile, appendDataToFile, readLines, problemName
 } from '../read.js';
 import { parentPort, workerData, isMainThread, Worker, threadId } from 'worker_threads';
 import { StaticPool } from 'node-worker-threads-pool';
-import { existsSync } from 'fs';
+import { existsSync, mkdirSync } from 'fs';
 import lodash from 'lodash';
-const { min, sortBy, max, find, uniq, sortedIndex } = lodash;
-
-
+import { resolve } from 'path';
+const { min, sortBy, inRange, max, find, uniq, sortedIndex, sortedIndexBy } = lodash;
 
 export type Cell = { start: number; num: number, end: number; };
 
@@ -17,15 +16,13 @@ export type Coordinate = [Cell, Cell];
 export type IsoForm = Coordinate[];
 
 export function solve351() {
-	const cacheInput = resolveCacheFile('a-easy-5-sorted-input.txt');
+	const cacheInput = resolveCacheFile(problemName + '-sorted-input.txt');
 	let testCount = 0;
+	let input: string[] | undefined = readLines(inputFile);
+	const [n, delta] = input[0].split(' ').map(Number);
 	if (existsSync(cacheInput)) {
-		let input: string[] | undefined = readLines(inputFile);
-		const [n, delta] = input[0].split(' ').map(Number);
 		testCount = Number(input[n + 1]);
 	} else {
-		let input: string[] | undefined = readLines(inputFile);
-		const [n, delta] = input[0].split(' ').map(Number);
 		const isoForms: { start: number, line: string }[] = new Array(n);
 		let lastLine = 1;
 		for (let i = 0; i < n; i++) {
@@ -35,7 +32,9 @@ export function solve351() {
 		}
 		let newInput = isoForms.map((form, index) => ({ form, index }));
 		newInput = sortBy(newInput, ni => ni.form.start);
-
+		if (!existsSync(resolve(cacheInput, '..'))) {
+			mkdirSync(resolve(cacheInput, '..'));
+		}
 		writeDataToFile(cacheInput, input[0]);
 		for (const ni of newInput) {
 			appendDataToFile(cacheInput, `\n${ni.index} `);
@@ -55,7 +54,7 @@ export function solve351() {
 	const workerCount = ((testCount - (testCount % threadLimit)) / threadLimit) + ((testCount % threadLimit) > 0 ? 1 : 0);
 
 	const staticPool = new StaticPool({
-		size: 5,
+		size: 1,
 		workerData: { file: cacheInput },
 		task: './dist/35/351.js' //workerThread
 	});
@@ -68,14 +67,13 @@ export function solve351() {
 			limit = testCount;
 		}
 		const param = { start, limit, index };
-		console.log(threadId, param);
+		// console.log(threadId, param);
 		staticPool.exec(param).then((result: { index: number, output: string }) => {
 			resultFiles.push(result);
-			console.log('result from thread pool:', result);
+			console.log('finish', result.index, result.output);
 			if (resultFiles.length === workerCount) {
 				const files = sortBy(resultFiles, 'index').map(r => r.output);
-				console.log(files);
-
+				console.log('concat files', files.length);
 				writeOutput('');
 				for (const file of files) {
 					const data = readDataFromFile(file);
@@ -106,16 +104,15 @@ if (!isMainThread) {
 			);
 		isoForms[i] = { index, isoForm };
 	}
-	const isoStarts = isoForms.map(iso => iso.isoForm[0][0].start);
 	const testCount = Number(input[lastLine++]);
 	console.log(threadId, n, isoForms.length, delta, testCount);
 
-	parentPort!.on('message', param => workerThread(input, isoForms, isoStarts, delta, lastLine, param.start, param.limit, param.index));
+	parentPort!.on('message', param => workerThread(input, isoForms, delta, lastLine, param.start, param.limit, param.index));
 }
 
-export function workerThread(input: string[], isoForms: { index: number, isoForm: IsoForm }[], isoStarts: number[], delta: number, lastLine: number, start: number, limit: number, index: number) {
+export function workerThread(input: string[], isoForms: { index: number, isoForm: IsoForm }[], delta: number, lastLine: number, start: number, limit: number, index: number) {
 
-	console.log('==start== ', threadId, index, start, limit, isoForms.length, delta);
+	console.log('==start==', { threadId, index, start, limit, ifl: isoForms.length, delta });
 
 	lastLine += start;
 	const output = resolveCacheFile('easy-' + index + '.txt');
@@ -125,8 +122,9 @@ export function workerThread(input: string[], isoForms: { index: number, isoForm
 	for (let i = start; i < limit; i++) {
 		const test = input[lastLine++].split(',').map(s => s.split('-').map(Number)) as [number, number][];
 
-		const match = findBestMath(delta, test, isoForms, isoStarts);
+		const match = findBestMath(delta, test, isoForms);
 		// console.log(i, testCount - i, match.index, match.count);
+		// console.log(match.index, match.count);
 
 		appendDataToFile(output, `${match.index} ${match.count}\n`);
 	}
@@ -135,13 +133,7 @@ export function workerThread(input: string[], isoForms: { index: number, isoForm
 	// return { index, output };
 }
 
-export function findBestMath(delta: number, test: [number, number][], isoForms: { index: number, isoForm: IsoForm }[], isoStarts: number[]) {
-	// let index = sortedIndex(isoStarts, test[0][0]);
-	// index--;
-	// if (index < 0) {
-	// 	index = 0
-	// }
-	// console.log('start search from ', index);
+export function findBestMath(delta: number, test: [number, number][], isoForms: { index: number, isoForm: IsoForm }[]) {
 	const matches: number[] = [];
 	fullSearch:
 	for (let index = 0; index < isoForms.length; index++) {
@@ -149,10 +141,7 @@ export function findBestMath(delta: number, test: [number, number][], isoForms: 
 		if (isoForm.isoForm.length < test.length) {
 			continue;
 		}
-		if (isBeyondStart(test[0], isoForm.isoForm[0])) {
-			break;
-		}
-		if (test[0][0] > isoForm.isoForm[0][0].start) {
+		if (!isInRange(test, isoForm.isoForm)) {
 			continue;
 		}
 		for (let x = 0; x < isoForm.isoForm.length; x++) {
@@ -161,9 +150,9 @@ export function findBestMath(delta: number, test: [number, number][], isoForms: 
 			}
 			if (isReadMatchIsoFormByDelta(test[0], isoForm.isoForm[x])) {
 				if (isReadMatchIsoForm(delta, test, isoForm.isoForm, x)) {
-					// if (delta == 0) {
-					// 	return { index, count: 1 };
-					// }
+					if (delta == 0) {
+						return { index, count: 1 };
+					}
 					matches.push(isoForm.index);
 				}
 				continue fullSearch;
@@ -207,6 +196,13 @@ export function inRangeOfCellEnd(test: [number, number], isoForm: Coordinate) {
 	return test[1] >= isoForm[1].start && test[1] <= isoForm[1].end;
 }
 
-export function isBeyondStart(test: [number, number], isoForm: Coordinate) {
-	return test[0] < isoForm[0].start;
+export function isInRange(test: [number, number][], isoForm: IsoForm) {
+	const isoStart = isoForm[0][0].start;
+	const isoEnd = isoForm[isoForm.length - 1][1].end;
+
+	const readStart = test[0][1];
+	const readEnd = test[test.length - 1][0];
+
+	// return inRange(readStart, isoStart, isoEnd) && inRange(readEnd, isoStart, isoEnd);
+	return readStart >= isoStart && readEnd <= isoEnd;
 }
