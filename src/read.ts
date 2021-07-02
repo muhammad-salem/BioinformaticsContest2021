@@ -4,7 +4,7 @@ import { SumType } from './test-d.js';
 
 
 const args = process.argv.slice(2);
-const problemName = args[0];
+export const problemName = args[0];
 export function readProblemName() {
 	return problemName;
 }
