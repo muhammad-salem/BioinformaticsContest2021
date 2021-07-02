@@ -7,7 +7,7 @@ import { parentPort, workerData, isMainThread, Worker, threadId } from 'worker_t
 import { StaticPool } from 'node-worker-threads-pool';
 import { existsSync } from 'fs';
 import lodash from 'lodash';
-const { min, sortBy, max, find, uniq, sortedIndexBy } = lodash;
+const { min, sortBy, max, find, uniq, sortedIndex } = lodash;
 
 
 
@@ -106,13 +106,14 @@ if (!isMainThread) {
 			);
 		isoForms[i] = { index, isoForm };
 	}
+	const isoStarts = isoForms.map(iso => iso.isoForm[0][0].start);
 	const testCount = Number(input[lastLine++]);
 	console.log(threadId, n, isoForms.length, delta, testCount);
 
-	parentPort!.on('message', param => workerThread(input, isoForms, delta, lastLine, param.start, param.limit, param.index));
+	parentPort!.on('message', param => workerThread(input, isoForms, isoStarts, delta, lastLine, param.start, param.limit, param.index));
 }
 
-export function workerThread(input: string[], isoForms: { index: number, isoForm: IsoForm }[], delta: number, lastLine: number, start: number, limit: number, index: number) {
+export function workerThread(input: string[], isoForms: { index: number, isoForm: IsoForm }[], isoStarts: number[], delta: number, lastLine: number, start: number, limit: number, index: number) {
 
 	console.log('==start== ', threadId, index, start, limit, isoForms.length, delta);
 
@@ -124,7 +125,7 @@ export function workerThread(input: string[], isoForms: { index: number, isoForm
 	for (let i = start; i < limit; i++) {
 		const test = input[lastLine++].split(',').map(s => s.split('-').map(Number)) as [number, number][];
 
-		const match = findBestMath(delta, test, isoForms);
+		const match = findBestMath(delta, test, isoForms, isoStarts);
 		// console.log(i, testCount - i, match.index, match.count);
 
 		appendDataToFile(output, `${match.index} ${match.count}\n`);
@@ -134,26 +135,25 @@ export function workerThread(input: string[], isoForms: { index: number, isoForm
 	// return { index, output };
 }
 
-export function findBestMath(delta: number, test: [number, number][], isoForms: { index: number, isoForm: IsoForm }[]) {
-	let index = sortedIndexBy(
-		isoForms,
-		{ index: 0, isoForm: [[{ start: test[0][0], num: 0, end: 0 }, { start: test[0][1], num: 0, end: 0 }]] },
-		iso => iso.isoForm[0][0].start
-	);
-	index--;
-	if (index < 0) {
-		index = 0
-	}
-	console.log('start search from ', index);
+export function findBestMath(delta: number, test: [number, number][], isoForms: { index: number, isoForm: IsoForm }[], isoStarts: number[]) {
+	// let index = sortedIndex(isoStarts, test[0][0]);
+	// index--;
+	// if (index < 0) {
+	// 	index = 0
+	// }
+	// console.log('start search from ', index);
 	const matches: number[] = [];
 	fullSearch:
-	for (/*let index = 0*/; index < isoForms.length; index++) {
+	for (let index = 0; index < isoForms.length; index++) {
 		const isoForm = isoForms[index];
 		if (isoForm.isoForm.length < test.length) {
 			continue;
 		}
 		if (isBeyondStart(test[0], isoForm.isoForm[0])) {
 			break;
+		}
+		if (test[0][0] > isoForm.isoForm[0][0].start) {
+			continue;
 		}
 		for (let x = 0; x < isoForm.isoForm.length; x++) {
 			if (isoForm.isoForm.length - x < test.length) {
