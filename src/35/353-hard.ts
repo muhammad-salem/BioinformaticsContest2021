@@ -54,8 +54,8 @@ export function solve353ExactHard() {
 	const workerCount = ((testCount - (testCount % threadLimit)) / threadLimit) + ((testCount % threadLimit) > 0 ? 1 : 0);
 
 	const staticPool = new StaticPool({
-		size: 1,
-		workerData: { file: cacheInput },
+		size: 5,
+		workerData: { file: cacheInput, problemName },
 		task: './dist/35/353-hard.js' //workerThread
 	});
 
@@ -111,12 +111,14 @@ if (!isMainThread) {
 	const testCount = Number(input[lastLine++]);
 	// console.log(threadId, n, isoForms.length, testCount);
 
-	parentPort!.on('message', param => workerThread(input, isoForms, lastLine + param.start, param.start, param.limit, param.index));
+	const cacheName = (workerData.problemName as string).split('/')[1];
+
+	parentPort!.on('message', param => workerThread(input, isoForms, lastLine + param.start, param.start, param.limit, param.index, cacheName));
 }
 
 
-export function workerThread(input: string[], isoForms: IsoFormInfo[], lastLine: number, start: number, limit: number, index: number) {
-	const output = resolveCacheFile('hard-' + index + '.txt');
+export function workerThread(input: string[], isoForms: IsoFormInfo[], lastLine: number, start: number, limit: number, index: number, name: string) {
+	const output = resolveCacheFile(name + '-' + index + '.txt');
 	writeDataToFile(output, '');
 	testLoop:
 	for (let i = start; i < limit; i++) {
@@ -160,10 +162,6 @@ export function findBestMatch(test: [number, number][], isoForms: IsoFormInfo[])
 	}
 	if (matches.length === 0) {
 		// return -1;
-		let best = findBestMatch(test.slice(1, test.length - 1), isoForms);
-		if (best > -1) {
-			return best;
-		}
 		return findBestMatch(test.slice(1), isoForms);
 	}
 	const best = maxBy(matches, m => m.count)!;
