@@ -8,7 +8,7 @@ import { StaticPool } from 'node-worker-threads-pool';
 import { existsSync, mkdirSync } from 'fs';
 import lodash from 'lodash';
 import { resolve } from 'path';
-const { min, maxBy, sortBy } = lodash;
+const { min, minBy, maxBy, sortBy } = lodash;
 
 export type Cell = { start: number; num: number, end: number; };
 export type Coordinate = [Cell, Cell];
@@ -135,7 +135,7 @@ export function findBestMatch(test: [number, number][], isoForms: IsoFormInfo[])
 	if (test.length == 0) {
 		return -1;
 	}
-	let matches: { index: number, count: number }[] = [];
+	let matches: { count: number, isoForm: IsoFormInfo }[] = [];
 	fullSearch:
 	for (let index = 0; index < isoForms.length; index++) {
 		const isoForm = isoForms[index];
@@ -152,7 +152,7 @@ export function findBestMatch(test: [number, number][], isoForms: IsoFormInfo[])
 			if (isReadMatchIsoFormByDelta(test[0], isoForm.isoForm[x])) {
 				const count = getReadMatchCount(isoForm.delta, test, isoForm.isoForm, x);
 				if (count > 0) {
-					matches.push({ index: isoForm.index, count });
+					matches.push({ count, isoForm });
 				}
 				continue fullSearch;
 			}
@@ -163,8 +163,11 @@ export function findBestMatch(test: [number, number][], isoForms: IsoFormInfo[])
 		return findBestMatch(test.slice(1), isoForms);
 	}
 	const best = maxBy(matches, m => m.count)!;
-	const allBest = matches.filter(m => m.count == best.count).map(m => m.index);
-	return min(allBest)!;
+	const allBestIsoForms = matches.filter(m => m.count == best.count).map(m => m.isoForm);
+	const minDelta = minBy(allBestIsoForms, f => f.delta)!;
+
+	const allMinDeltaMaxCount = allBestIsoForms.filter(f => f.delta == minDelta.delta).map(m => m.index)
+	return min(allMinDeltaMaxCount)!;
 }
 
 export function getReadMatchCount(delta: number, test: [number, number][], isoForm: IsoForm, start: number) {
