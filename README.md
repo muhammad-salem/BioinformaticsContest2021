@@ -70,7 +70,7 @@ tsc
 | 1 | - | 
 
 
-| Isoform Matching | Run Command |
+| Isoform Matching (Easy)| Run Command |
 | -------------------- | - |
 | Test #00 | node dist/index.js 5-easy/00 |
 | Test #10-welcome | node dist/index.js 5-easy/10-welcome |
@@ -79,3 +79,9 @@ tsc
 | Test #35-mouse-inexact | node dist/index.js 5-easy/35-mouse-inexact |
 | Test #55-huge-inexact' | node dist/index.js 5-easy/55-huge-inexact' |
 | Test #60-huge-inexact | node dist/index.js 5-easy/60-huge-inexact |
+
+| Isoform Matching (Hard)| Run Command |
+| -------------------- | - |
+| Test #70-welcome-approx | node dist/index.js 5-hard/70-welcome-approx |
+| Test #80-big-approx | node dist/index.js 5-hard/80-big-approx |
+| Test #90-huge-approx | node dist/index.js 5-hard/90-huge-approx |
