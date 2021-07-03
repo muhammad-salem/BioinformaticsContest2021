@@ -160,6 +160,10 @@ export function findBestMatch(test: [number, number][], isoForms: IsoFormInfo[])
 	}
 	if (matches.length === 0) {
 		// return -1;
+		let best = findBestMatch(test.slice(1, test.length - 1), isoForms);
+		if (best > -1) {
+			return best;
+		}
 		return findBestMatch(test.slice(1), isoForms);
 	}
 	const best = maxBy(matches, m => m.count)!;
