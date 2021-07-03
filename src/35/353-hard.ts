@@ -163,7 +163,7 @@ export function findBestMath(test: [number, number][], isoForms: IsoFormInfo[]):
 		return findBestMath(test.slice(1), isoForms);
 	}
 	const best = maxBy(matches, m => m.count)!;
-	const allBest = matches.filter(m => m.count = best.count).map(m => m.index);
+	const allBest = matches.filter(m => m.count == best.count).map(m => m.index);
 	return min(allBest)!;
 }
 
