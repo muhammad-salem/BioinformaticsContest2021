@@ -29,6 +29,19 @@
 			"args": [
 				"5-easy/30-mouse-exact",
 			]
+		},
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Hard 01",
+			"program": "${workspaceFolder}/src/index.ts",
+			"preLaunchTask_disable": "tsc: build - tsconfig.json",
+			"outFiles": [
+				"${workspaceFolder}/dist/**/*.js"
+			],
+			"args": [
+				"5-hard/01",
+			]
 		}
 	]
 }

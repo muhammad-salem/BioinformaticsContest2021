@@ -2,6 +2,7 @@ import { solve32 } from './32/1.js';
 import { solve341 } from './34/341.js';
 import { solve351 } from './35/351.js';
 import { solve352Exact } from './35/352.js';
+import { solve353ExactHard } from './35/353-hard.js';
 import { readProblemName } from './read.js';
 import startD412 from './start-d-4.js';
 import startA from './test-a.js';
@@ -48,6 +49,11 @@ switch (problemName) {
 	case '5-easy/20-mouse-simple-exact':
 	case '5-easy/30-mouse-exact':
 		solve352Exact(); break;
+	case '5-hard/01':
+	case '5-hard/70-welcome-approx':
+	case '5-hard/80-big-approx':
+	case '5-hard/90-huge-approx':
+		solve353ExactHard(); break;
 
 	default:
 		break;
