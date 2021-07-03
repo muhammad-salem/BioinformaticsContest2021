@@ -162,7 +162,9 @@ export function findBestMath(test: [number, number][], isoForms: IsoFormInfo[]):
 		}
 		return findBestMath(test.slice(1), isoForms);
 	}
-	return maxBy(matches, m => m.count)!.index;
+	const best = maxBy(matches, m => m.count)!;
+	const allBest = matches.filter(m => m.count = best.count).map(m => m.index);
+	return min(allBest)!;
 }
 
 export function getReadMatchCount(delta: number, test: [number, number][], isoForm: IsoForm, start: number) {
