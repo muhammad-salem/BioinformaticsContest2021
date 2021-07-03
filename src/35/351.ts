@@ -15,6 +15,14 @@ export type Cell = { start: number; num: number, end: number; };
 export type Coordinate = [Cell, Cell];
 export type IsoForm = Coordinate[];
 
+/**
+ * input sorting for now is useless, i didn't figure out yest how to use the sorting
+ * - the abstract idea was to get the index of the first match, then start matching
+ * - check if the  if the test is out of isoForm range so not to make extra check
+ * 
+ * - take up to 5+ hours on "Intel® Core™ i5-8265U CPU @ 1.60GHz × 8" with only 5 threads,
+ *   and 5.4G of RAMS
+ */
 export function solve351() {
 	const cacheInput = resolveCacheFile(problemName + '-sorted-input.txt');
 	let testCount = 0;
