@@ -122,7 +122,7 @@ export function workerThread(input: string[], isoForms: IsoFormInfo[], lastLine:
 	for (let i = start; i < limit; i++) {
 		const test = input[lastLine++].split(',').map(s => s.split('-').map(Number)) as [number, number][];
 
-		const match = findBestMath(test, isoForms);
+		const match = findBestMatch(test, isoForms);
 		// console.log(i, testCount - i, match.index, match.count);
 		// console.log(match.index, match.count);
 
@@ -131,7 +131,7 @@ export function workerThread(input: string[], isoForms: IsoFormInfo[], lastLine:
 	parentPort?.postMessage({ index, output });
 }
 
-export function findBestMath(test: [number, number][], isoForms: IsoFormInfo[]): number {
+export function findBestMatch(test: [number, number][], isoForms: IsoFormInfo[]): number {
 	if (test.length == 0) {
 		return -1;
 	}
@@ -160,7 +160,7 @@ export function findBestMath(test: [number, number][], isoForms: IsoFormInfo[]):
 	}
 	if (matches.length === 0) {
 		// return -1;
-		return findBestMath(test.slice(1), isoForms);
+		return findBestMatch(test.slice(1), isoForms);
 	}
 	const best = maxBy(matches, m => m.count)!;
 	const allBest = matches.filter(m => m.count == best.count).map(m => m.index);
