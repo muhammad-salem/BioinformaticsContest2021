@@ -7,7 +7,7 @@
 		{
 			"type": "node",
 			"request": "launch",
-			"name": "Launch Program 351",
+			"name": "Launch 20",
 			"program": "${workspaceFolder}/src/index.ts",
 			"preLaunchTask_disable": "tsc: build - tsconfig.json",
 			"outFiles": [
@@ -15,9 +15,22 @@
 			],
 			"args": [
 				// "5-easy/00",
-				"5-easy/10-welcome",
-				// "5-easy/20-mouse-simple-exact",
+				// "5-easy/10-welcome",
+				"5-easy/20-mouse-simple-exact",
 				// "5-easy/60-huge-inexact",
+			]
+		},
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Launch 30",
+			"program": "${workspaceFolder}/src/index.ts",
+			"preLaunchTask_disable": "tsc: build - tsconfig.json",
+			"outFiles": [
+				"${workspaceFolder}/dist/**/*.js"
+			],
+			"args": [
+				"5-easy/30-mouse-exact",
 			]
 		}
 	]
