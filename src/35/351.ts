@@ -206,3 +206,23 @@ export function isInRange(test: [number, number][], isoForm: IsoForm) {
 	// return inRange(readStart, isoStart, isoEnd) && inRange(readEnd, isoStart, isoEnd);
 	return readStart >= isoStart && readEnd <= isoEnd;
 }
+
+export function isOutOfRange(test: [number, number][], isoForm: IsoForm) {
+	return isOutOfRangeLeft(test, isoForm) || isOutOfRangeRight(test, isoForm);
+}
+
+export function isOutOfRangeLeft(test: [number, number][], isoForm: IsoForm) {
+	const isoStart = isoForm[0][0].start;
+	// const isoEnd = isoForm[isoForm.length - 1][1].end;
+	// const readStart = test[0][1];
+	const readEnd = test[test.length - 1][0];
+	return readEnd <= isoStart;
+}
+
+export function isOutOfRangeRight(test: [number, number][], isoForm: IsoForm) {
+	// const isoStart = isoForm[0][0].start;
+	const isoEnd = isoForm[isoForm.length - 1][1].end;
+	const readStart = test[0][1];
+	// const readEnd = test[test.length - 1][0];
+	return readStart >= isoEnd;
+}
