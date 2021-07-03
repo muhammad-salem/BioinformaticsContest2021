@@ -8,7 +8,7 @@ import { StaticPool } from 'node-worker-threads-pool';
 import { existsSync, mkdirSync } from 'fs';
 import lodash from 'lodash';
 import { resolve } from 'path';
-const { min, maxBy, sortBy, lastIndexOf, inRange, max, find, uniq, sortedIndex, sortedIndexBy, sortedLastIndexBy } = lodash;
+const { min, maxBy, sortBy } = lodash;
 
 export type Cell = { start: number; num: number, end: number; };
 export type Coordinate = [Cell, Cell];
