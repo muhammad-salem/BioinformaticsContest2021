@@ -132,6 +132,9 @@ export function workerThread(input: string[], isoForms: IsoFormInfo[], lastLine:
 }
 
 export function findBestMath(test: [number, number][], isoForms: IsoFormInfo[]): number {
+	if (test.length == 0) {
+		return -1;
+	}
 	let matches: { index: number, count: number }[] = [];
 	fullSearch:
 	for (let index = 0; index < isoForms.length; index++) {
@@ -157,9 +160,6 @@ export function findBestMath(test: [number, number][], isoForms: IsoFormInfo[]):
 	}
 	if (matches.length === 0) {
 		// return -1;
-		if (test.length == 0) {
-			return -1;
-		}
 		return findBestMath(test.slice(1), isoForms);
 	}
 	const best = maxBy(matches, m => m.count)!;
@@ -169,7 +169,7 @@ export function findBestMath(test: [number, number][], isoForms: IsoFormInfo[]):
 
 export function getReadMatchCount(delta: number, test: [number, number][], isoForm: IsoForm, start: number) {
 	let count = 0;
-	for (let i = 1, x = start + 1, l = test.length - 1; i < l; i++, x++) {
+	for (let i = 0, x = start, l = test.length - 1; i < l; i++, x++) {
 		if (!isInBlockNoDelta(test[i], isoForm[x])) {
 			return -1;
 		} else {
