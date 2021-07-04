@@ -12,10 +12,12 @@ const { min, minBy, maxBy, sortBy } = lodash;
 
 
 
-export type Cell = { start: number; num: number, end: number; };
-export type Coordinate = [Cell, Cell];
+// export type Cell = { start: number; num: number, end: number; };
+// export type Coordinate = [Cell, Cell];
+export type Coordinate = [number, number];
 export type IsoForm = Coordinate[];
-export type IsoFormInfo = { index: number; isoForm: IsoForm; length: number, delta: number, maxCoverLength: number };
+// export type IsoFormInfo = { index: number; isoForm: IsoForm; length: number, delta: number, maxCoverLength: number; };
+export type IsoFormInfo = { index: number; isoForm: IsoForm; delta: number; };
 
 
 export function solve353ExactHardSimilar() {
@@ -100,17 +102,21 @@ if (!isMainThread) {
 		const index = +lines[0];
 
 		const firstCoordinate = lines[1].substring(0, lines[1].indexOf(',')).split('-').map(Number);
-		const length = firstCoordinate[1] - firstCoordinate[0];
-		const delta = ((length - (length % 2)) / 2) - 1 + ((length % 2) > 0 ? 1 : 10);
+		// const length = firstCoordinate[1] - firstCoordinate[0];
+		// const delta = ((length - (length % 2)) / 2) - 1 + ((length % 2) > 0 ? 1 : 10);
 		const isoForm = lines[1]
 			.split(',')
 			.map(s => s
 				.split('-')
-				.map(Number)
-				.map(m => ({ start: m - delta, num: m, end: m + delta })) as Coordinate
+				.map(Number) as Coordinate
+				// .map(m => ({ start: m - delta, num: m, end: m + delta })) as Coordinate
 			);
 
-		isoForms[i] = { index, isoForm, length, delta, maxCoverLength: length + (2 * delta) };
+		const deltaCo = maxBy(isoForm, co => co[1] - co[0])!;
+		const delta = deltaCo[1] - deltaCo[0];
+
+
+		isoForms[i] = { index, isoForm, delta };
 	}
 	const testCount = Number(input[lastLine++]);
 	// console.log(threadId, n, isoForms.length, testCount);
@@ -204,25 +210,25 @@ export function isReadApplySimilarity(test: [number, number], isoForm: Coordinat
 }
 
 export function getCoveredExonLength(test: [number, number], isoForm: Coordinate) {
-	if (test[0] >= isoForm[0].num) {
-		if (test[1] <= isoForm[1].num) {
+	if (test[0] >= isoForm[0]) {
+		if (test[1] <= isoForm[1]) {
 			return test[1] - test[0];
 		}
-		return isoForm[1].num - test[0];
+		return isoForm[1] - test[0];
 	}
-	if (test[1] <= isoForm[1].num) {
-		return test[1] - isoForm[0].num;
+	if (test[1] <= isoForm[1]) {
+		return test[1] - isoForm[0];
 	}
-	return isoForm[1].num - isoForm[0].num;
+	return isoForm[1] - isoForm[0];
 }
 
 export function getCoveredIntronLength(test: [number, number], isoForm: Coordinate) {
-	if (test[0] < isoForm[0].num && test[1] > isoForm[1].num) {
-		return (isoForm[0].num - test[0]) + (test[1] - isoForm[1].num);
-	} else if (test[0] < isoForm[0].num) {
-		return isoForm[0].num - test[0];
-	} else if (test[1] > isoForm[1].num) {
-		return test[1] - isoForm[1].num;
+	if (test[0] < isoForm[0] && test[1] > isoForm[1]) {
+		return (isoForm[0] - test[0]) + (test[1] - isoForm[1]);
+	} else if (test[0] < isoForm[0]) {
+		return isoForm[0] - test[0];
+	} else if (test[1] > isoForm[1]) {
+		return test[1] - isoForm[1];
 	}
 	return 0;
 }
