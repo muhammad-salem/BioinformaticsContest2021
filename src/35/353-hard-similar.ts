@@ -112,7 +112,7 @@ if (!isMainThread) {
 				// .map(m => ({ start: m - delta, num: m, end: m + delta })) as Coordinate
 			);
 
-		const deltaCo = maxBy(isoForm, co => co[1] - co[0])!;
+		const deltaCo = minBy(isoForm, co => co[1] - co[0])!;
 		const delta = deltaCo[1] - deltaCo[0];
 
 
