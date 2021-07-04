@@ -148,15 +148,12 @@ export function findBestMatch(test: [number, number][], isoForms: IsoFormInfo[])
 		if (isoFormInfo.isoForm.length < test.length) {
 			continue;
 		}
-		if (!isInRange(test, isoFormInfo.isoForm)) {
-			continue;
-		}
 		for (let x = 0; x < isoFormInfo.isoForm.length; x++) {
 			if (isoFormInfo.isoForm.length - x < test.length) {
 				continue fullSearch;
 			}
 			if (isReadApplySimilarity(test[0], isoFormInfo.isoForm[x])) {
-				const count = getReadMatchCount(isoFormInfo.delta, test, isoFormInfo.isoForm, x, isoFormInfo);
+				const count = getReadMatchCount(test, isoFormInfo.isoForm, x);
 				if (count > 0) {
 					matches.push({ count, isoForm: isoFormInfo });
 				}
@@ -170,27 +167,22 @@ export function findBestMatch(test: [number, number][], isoForms: IsoFormInfo[])
 	}
 	const best = maxBy(matches, m => m.count)!;
 	const allBestIsoForms = matches.filter(m => m.count == best.count).map(m => m.isoForm);
-	const minDelta = minBy(allBestIsoForms, f => f.delta)!;
+	// const minDelta = minBy(allBestIsoForms, f => f.delta)!;
+	// const allMinDeltaMaxCount = allBestIsoForms.filter(f => f.delta == minDelta.delta).map(m => m.index);
 
-	const allMinDeltaMaxCount = allBestIsoForms.filter(f => f.delta == minDelta.delta).map(m => m.index)
+	const allMinDeltaMaxCount = allBestIsoForms.map(m => m.index);
 	return min(allMinDeltaMaxCount)!;
 }
 
-export function getReadMatchCount(delta: number, test: [number, number][], isoForm: IsoForm, start: number, info: IsoFormInfo) {
+export function getReadMatchCount(test: [number, number][], isoForm: IsoForm, start: number) {
 	let count = 0;
 	for (let i = 0, x = start, l = test.length; i < l; i++, x++) {
-		if (!isReadApplySimilarity(test[i], isoForm[x])) {
-			return -1;
-		} else {
+		if (isReadApplySimilarity(test[i], isoForm[x])) {
 			count++;
+		} else {
+			return -1;
 		}
 	}
-	// const lastTest = test[test.length - 1], lastIsoForm = isoForm[start + test.length - 1];
-	// if (Math.abs(lastTest[0] - lastIsoForm[0].num) <= delta) {
-	// 	if (lastTest[1] <= (lastIsoForm[1].num + delta)) {
-	// 		count++;
-	// 	}
-	// }
 	return count;
 }
 
@@ -234,56 +226,3 @@ export function getCoveredIntronLength(test: [number, number], isoForm: Coordina
 	}
 	return 0;
 }
-
-
-export function isIsoFormInRangeOfRead(isoForm: Coordinate, test: Coordinate) {
-	return isoForm[0] >= test[0] && isoForm[0] <= test[0];
-}
-
-export function isReadMatchIsoFormByDelta(test: [number, number], isoForm: Coordinate) {
-	return test[0] >= isoForm[0].start && inRangeOfCellEnd(test, isoForm);
-}
-
-export function isInBlockNoDelta(test: [number, number], isoForm: Coordinate) {
-	return inRangeOfCellStart(test, isoForm) && inRangeOfCellEnd(test, isoForm);
-}
-
-export function inRangeOfCellStart(test: [number, number], isoForm: Coordinate) {
-	return test[0] >= isoForm[0].start && test[0] <= isoForm[0].end;
-}
-
-export function inRangeOfCellEnd(test: [number, number], isoForm: Coordinate) {
-	return test[1] >= isoForm[1].start && test[1] <= isoForm[1].end;
-}
-
-export function isInRange(test: [number, number][], isoForm: IsoForm) {
-	const isoStart = isoForm[0][0].start;
-	const isoEnd = isoForm[isoForm.length - 1][1].end;
-
-	const readStart = test[0][1];
-	const readEnd = test[test.length - 1][0];
-
-	// return inRange(readStart, isoStart, isoEnd) && inRange(readEnd, isoStart, isoEnd);
-	return readStart >= isoStart && readEnd <= isoEnd;
-}
-
-export function isOutOfRange(test: [number, number][], isoForm: IsoForm) {
-	return isOutOfRangeLeft(test, isoForm) || isOutOfRangeRight(test, isoForm);
-}
-
-export function isOutOfRangeLeft(test: [number, number][], isoForm: IsoForm) {
-	const isoStart = isoForm[0][0].start;
-	// const isoEnd = isoForm[isoForm.length - 1][1].end;
-	// const readStart = test[0][1];
-	const readEnd = test[test.length - 1][0];
-	return readEnd <= isoStart;
-}
-
-export function isOutOfRangeRight(test: [number, number][], isoForm: IsoForm) {
-	// const isoStart = isoForm[0][0].start;
-	const isoEnd = isoForm[isoForm.length - 1][1].end;
-	const readStart = test[0][1];
-	// const readEnd = test[test.length - 1][0];
-	return readStart >= isoEnd;
-}
-
