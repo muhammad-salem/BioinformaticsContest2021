@@ -22,5 +22,8 @@
     "typescript.preferences.quoteStyle": "single",
     "typescript.referencesCodeLens.showOnAllFunctions": true,
     "typescript.referencesCodeLens.enabled": true,
-    "typescript.tsdk": "node_modules/typescript/lib"
+	"typescript.tsdk": "node_modules/typescript/lib",
+	"cSpell.words": [
+		"Intron"
+	]
 }
