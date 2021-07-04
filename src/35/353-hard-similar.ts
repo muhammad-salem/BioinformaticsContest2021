@@ -178,7 +178,7 @@ export function findBestMatch(test: [number, number][], isoForms: IsoFormInfo[])
 
 export function getReadMatchCount(delta: number, test: [number, number][], isoForm: IsoForm, start: number, info: IsoFormInfo) {
 	let count = 0;
-	for (let i = 1, x = start + 1, l = test.length - 1; i < l; i++, x++) {
+	for (let i = 0, x = start, l = test.length - 1; i < l; i++, x++) {
 		if (!isReadApplySimilarity(test[i][1] - test[i][0], test[i], isoForm[x])) {
 			return -1;
 		} else {
