@@ -110,16 +110,16 @@ if (!isMainThread) {
 				.split('-')
 				.map(Number)
 				// .map(m => ({ start: m - delta, num: m, end: m + delta })) as Coordinate
-			);
+			)
+			.map(s => ({ num: s, delta: s[1] - s[0] }));
 
-		const deltaCo = minBy(isoFormNum, co => co[1] - co[0])!;
-		const delta = deltaCo[1] - deltaCo[0];
+		const delta = minBy(isoFormNum, co => co.delta)!.delta;
 
 		const isoForm = isoFormNum.map(
-			(s, si) => s.map(m => ({
-				start: m - (si === 0 ? 0 : delta),
+			(s, si) => s.num.map(m => ({
+				start: m - (si === 0 ? 0 : s.delta),
 				num: m,
-				end: m + (si === isoFormNum.length - 1 ? 0 : delta)
+				end: m + (si === isoFormNum.length - 1 ? 0 : s.delta)
 			})) as Coordinate
 		);
 
@@ -208,20 +208,6 @@ export function getReadMatchCount(test: [number, number][], isoForm: IsoForm, st
 	return (twoBy3 * exonOverlap) + (oneBy3 * intronOverlap);
 }
 
-
-
-export function isReadApplySimilarity(test: [number, number], isoForm: Coordinate) {
-	const testLength = test[1] - test[0];
-	// const exonLength = getCoveredExonLength(test, isoForm);
-	const intronLength = getCoveredIntronLength(test, isoForm);
-	// if ((exonLength / testLength) > twoBy3) {
-	// 	return false;
-	// }
-	if ((intronLength / testLength) > oneBy3) {
-		return false;
-	}
-	return true;
-}
 
 export function getSimilarityOverlap(test: [number, number], isoForm: Coordinate) {
 	// const testLength = test[1] - test[0];
