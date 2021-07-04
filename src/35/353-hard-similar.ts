@@ -173,10 +173,10 @@ export function findBestMatch(test: [number, number][], isoForms: IsoFormInfo[])
 	}
 	const best = maxBy(matches, m => m.count)!;
 	const allBestIsoForms = matches.filter(m => m.count == best.count).map(m => m.isoForm);
-	const minDelta = minBy(allBestIsoForms, f => f.delta)!;
-	const allMinDeltaMaxCount = allBestIsoForms.filter(f => f.delta == minDelta.delta).map(m => m.index);
+	// const minDelta = minBy(allBestIsoForms, f => f.delta)!;
+	// const allMinDeltaMaxCount = allBestIsoForms.filter(f => f.delta == minDelta.delta).map(m => m.index);
 
-	// const allMinDeltaMaxCount = allBestIsoForms.map(m => m.index);
+	const allMinDeltaMaxCount = allBestIsoForms.map(m => m.index);
 	return min(allMinDeltaMaxCount)!;
 }
 
