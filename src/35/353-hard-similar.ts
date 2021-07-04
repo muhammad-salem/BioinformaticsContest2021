@@ -12,9 +12,9 @@ const { min, minBy, maxBy, sortBy } = lodash;
 
 
 
-// export type Cell = { start: number; num: number, end: number; };
-// export type Coordinate = [Cell, Cell];
-export type Coordinate = [number, number];
+export type Cell = { start: number; num: number, end: number; };
+export type Coordinate = [Cell, Cell];
+// export type Coordinate = [number, number];
 export type IsoForm = Coordinate[];
 // export type IsoFormInfo = { index: number; isoForm: IsoForm; length: number, delta: number, maxCoverLength: number; };
 export type IsoFormInfo = { index: number; isoForm: IsoForm; delta: number; };
@@ -104,16 +104,18 @@ if (!isMainThread) {
 		const firstCoordinate = lines[1].substring(0, lines[1].indexOf(',')).split('-').map(Number);
 		// const length = firstCoordinate[1] - firstCoordinate[0];
 		// const delta = ((length - (length % 2)) / 2) - 1 + ((length % 2) > 0 ? 1 : 10);
-		const isoForm = lines[1]
+		const isoFormNum = lines[1]
 			.split(',')
 			.map(s => s
 				.split('-')
-				.map(Number) as Coordinate
+				.map(Number)
 				// .map(m => ({ start: m - delta, num: m, end: m + delta })) as Coordinate
 			);
 
-		const deltaCo = minBy(isoForm, co => co[1] - co[0])!;
+		const deltaCo = minBy(isoFormNum, co => co[1] - co[0])!;
 		const delta = deltaCo[1] - deltaCo[0];
+
+		const isoForm = isoFormNum.map(s => s.map(m => ({ start: m - delta, num: m, end: m + delta })) as Coordinate);
 
 
 		isoForms[i] = { index, isoForm, delta };
@@ -158,7 +160,7 @@ export function findBestMatch(test: [number, number][], isoForms: IsoFormInfo[])
 			if (isoFormInfo.isoForm.length - x < test.length) {
 				continue fullSearch;
 			}
-			if (isReadApplySimilarity(test[0], isoFormInfo.isoForm[x])) {
+			if (isReadMatchIsoFormByDelta(test[0], isoFormInfo.isoForm[x])) {
 				const count = getReadMatchCount(test, isoFormInfo.isoForm, x);
 				if (count > 0) {
 					matches.push({ count, isoForm: isoFormInfo });
@@ -173,10 +175,10 @@ export function findBestMatch(test: [number, number][], isoForms: IsoFormInfo[])
 	}
 	const best = maxBy(matches, m => m.count)!;
 	const allBestIsoForms = matches.filter(m => m.count == best.count).map(m => m.isoForm);
-	// const minDelta = minBy(allBestIsoForms, f => f.delta)!;
-	// const allMinDeltaMaxCount = allBestIsoForms.filter(f => f.delta == minDelta.delta).map(m => m.index);
+	const minDelta = minBy(allBestIsoForms, f => f.delta)!;
+	const allMinDeltaMaxCount = allBestIsoForms.filter(f => f.delta == minDelta.delta).map(m => m.index);
 
-	const allMinDeltaMaxCount = allBestIsoForms.map(m => m.index);
+	// const allMinDeltaMaxCount = allBestIsoForms.map(m => m.index);
 	return min(allMinDeltaMaxCount)!;
 }
 
@@ -218,25 +220,34 @@ export function getSimilarityOverlap(test: [number, number], isoForm: Coordinate
 }
 
 export function getCoveredExonLength(test: [number, number], isoForm: Coordinate) {
-	if (test[0] >= isoForm[0]) {
-		if (test[1] <= isoForm[1]) {
+	if (test[0] >= isoForm[0].num) {
+		if (test[1] <= isoForm[1].num) {
 			return test[1] - test[0];
 		}
-		return isoForm[1] - test[0];
+		return isoForm[1].num - test[0];
 	}
-	if (test[1] <= isoForm[1]) {
-		return test[1] - isoForm[0];
+	if (test[1] <= isoForm[1].num) {
+		return test[1] - isoForm[0].num;
 	}
-	return isoForm[1] - isoForm[0];
+	return isoForm[1].num - isoForm[0].num;
 }
 
 export function getCoveredIntronLength(test: [number, number], isoForm: Coordinate) {
-	if (test[0] < isoForm[0] && test[1] > isoForm[1]) {
-		return (isoForm[0] - test[0]) + (test[1] - isoForm[1]);
-	} else if (test[0] < isoForm[0]) {
-		return isoForm[0] - test[0];
-	} else if (test[1] > isoForm[1]) {
-		return test[1] - isoForm[1];
+	if (test[0] < isoForm[0].num && test[1] > isoForm[1].num) {
+		return (isoForm[0].num - test[0]) + (test[1] - isoForm[1].num);
+	} else if (test[0] < isoForm[0].num) {
+		return isoForm[0].num - test[0];
+	} else if (test[1] > isoForm[1].num) {
+		return test[1] - isoForm[1].num;
 	}
 	return 0;
+}
+
+
+export function isReadMatchIsoFormByDelta(test: [number, number], isoForm: Coordinate) {
+	return test[0] >= isoForm[0].start && inRangeOfCellEnd(test, isoForm);
+}
+
+export function inRangeOfCellEnd(test: [number, number], isoForm: Coordinate) {
+	return test[1] >= isoForm[1].start && test[1] <= isoForm[1].end;
 }
