@@ -101,7 +101,7 @@ if (!isMainThread) {
 
 		const firstCoordinate = lines[1].substring(0, lines[1].indexOf(',')).split('-').map(Number);
 		const length = firstCoordinate[1] - firstCoordinate[0];
-		const delta = (length / 2) - 1;
+		const delta = ((length - (length % 2)) / 2) - 1 + ((length % 2) > 0 ? 1 : 10);
 		const isoForm = lines[1]
 			.split(',')
 			.map(s => s
@@ -167,10 +167,10 @@ export function findBestMatch(test: [number, number][], isoForms: IsoFormInfo[])
 	}
 	const best = maxBy(matches, m => m.count)!;
 	const allBestIsoForms = matches.filter(m => m.count == best.count).map(m => m.isoForm);
-	// const minDelta = minBy(allBestIsoForms, f => f.delta)!;
-	// const allMinDeltaMaxCount = allBestIsoForms.filter(f => f.delta == minDelta.delta).map(m => m.index);
+	const minDelta = minBy(allBestIsoForms, f => f.delta)!;
+	const allMinDeltaMaxCount = allBestIsoForms.filter(f => f.delta == minDelta.delta).map(m => m.index);
 
-	const allMinDeltaMaxCount = allBestIsoForms.map(m => m.index);
+	// const allMinDeltaMaxCount = allBestIsoForms.map(m => m.index);
 	return min(allMinDeltaMaxCount)!;
 }
 
