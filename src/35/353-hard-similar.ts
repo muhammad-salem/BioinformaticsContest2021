@@ -155,7 +155,7 @@ export function findBestMatch(test: [number, number][], isoForms: IsoFormInfo[])
 			if (isoFormInfo.isoForm.length - x < test.length) {
 				continue fullSearch;
 			}
-			if (isReadSimilarToIsoForm(test[0], isoFormInfo.isoForm[x], isoFormInfo)) {
+			if (isReadMatchIsoFormByDelta(test[0], isoFormInfo.isoForm[x])) {
 				const count = getReadMatchCount(isoFormInfo.delta, test, isoFormInfo.isoForm, x, isoFormInfo);
 				if (count > 0) {
 					matches.push({ count, isoForm: isoFormInfo });
@@ -178,8 +178,8 @@ export function findBestMatch(test: [number, number][], isoForms: IsoFormInfo[])
 
 export function getReadMatchCount(delta: number, test: [number, number][], isoForm: IsoForm, start: number, info: IsoFormInfo) {
 	let count = 0;
-	for (let i = 0, x = start, l = test.length - 1; i < l; i++, x++) {
-		if (!isInBlockNoDelta(test[i], isoForm[x])) {
+	for (let i = 1, x = start + 1, l = test.length - 1; i < l; i++, x++) {
+		if (!isReadApplySimilarity(test[i][1] - test[i][0], test[i], isoForm[x])) {
 			return -1;
 		} else {
 			count++;
@@ -195,33 +195,31 @@ export function getReadMatchCount(delta: number, test: [number, number][], isoFo
 }
 
 export function isReadSimilarToIsoForm(test: [number, number], isoForm: Coordinate, info: IsoFormInfo): boolean {
-	const testStart = test[0];
-	const testEnd = test[1];
-	const testLength = testEnd - testStart;
-	if (testLength > info.maxCoverLength) {
-		return false;
-	} else if (testLength == info.maxCoverLength) {
-		if ((info.delta * 2) > oneBy3) {
-			return false;
-		}
-		return true;
-	}
-	if (testStart >= isoForm[0].num && testEnd <= isoForm[1].end) {
-		return true;
-	} else if (testStart >= isoForm[0].start || testEnd <= isoForm[0].end) {
-		return isReadApplySimilarity(test, isoForm);
-	}
-	return false;
+	// const testStart = test[0];
+	// const testEnd = test[1];
+	// const testLength = testEnd - testStart;
+	// if (testLength > info.maxCoverLength) {
+	// 	return false;
+	// } else if (testLength == info.maxCoverLength) {
+	// 	if ((info.delta * 2) > oneBy3) {
+	// 		return false;
+	// 	}
+	// 	return true;
+	// }
+	// if (testStart >= isoForm[0].num && testEnd <= isoForm[1].end) {
+	// 	return true;
+	// } else if (testStart >= isoForm[0].start || testEnd <= isoForm[0].end) {
+	// 	return isReadApplySimilarity(testLength, test, isoForm);
+	// }
+	// return false;
+	return isReadApplySimilarity(test[1] - test[0], test, isoForm);
 }
 
 
 const twoBy3 = 2 / 3;
 const oneBy3 = 1 / 3;
 
-export function isReadApplySimilarity(test: [number, number], isoForm: Coordinate) {
-	const testStart = test[0];
-	const testEnd = test[1];
-	const testLength = testEnd - testStart;
+export function isReadApplySimilarity(testLength: number, test: [number, number], isoForm: Coordinate) {
 	// const exonLength = getCoveredExonLength(test, isoForm);
 	const intronLength = getCoveredIntronLength(test, isoForm);
 	// if ((exonLength / testLength) > twoBy3) {
