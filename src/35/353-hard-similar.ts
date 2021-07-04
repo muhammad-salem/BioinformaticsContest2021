@@ -222,11 +222,11 @@ export function isReadApplySimilarity(test: [number, number], isoForm: Coordinat
 	const testStart = test[0];
 	const testEnd = test[1];
 	const testLength = testEnd - testStart;
-	const exonLength = getCoveredExonLength(test, isoForm);
+	// const exonLength = getCoveredExonLength(test, isoForm);
 	const intronLength = getCoveredIntronLength(test, isoForm);
-	if ((exonLength / testLength) > twoBy3) {
-		return false;
-	}
+	// if ((exonLength / testLength) > twoBy3) {
+	// 	return false;
+	// }
 	if ((intronLength / testLength) > oneBy3) {
 		return false;
 	}
