@@ -180,21 +180,22 @@ export function findBestMatch(test: [number, number][], isoForms: IsoFormInfo[])
 	return min(allMinDeltaMaxCount)!;
 }
 
+const twoBy3 = 2 / 3;
+const oneBy3 = 1 / 3;
+
 export function getReadMatchCount(test: [number, number][], isoForm: IsoForm, start: number) {
-	let count = 0;
+	// let count = 0;
+	let exonOverlap = 0;
+	let intronOverlap = 0;
 	for (let i = 0, x = start, l = test.length; i < l; i++, x++) {
-		if (isReadApplySimilarity(test[i], isoForm[x])) {
-			count++;
-		} else {
-			return -1;
-		}
+		const overlap = getSimilarityOverlap(test[i], isoForm[x]);
+		exonOverlap += overlap.exon;
+		intronOverlap += overlap.intron;
 	}
-	return count;
+	return (twoBy3 * exonOverlap) + (oneBy3 * intronOverlap);
 }
 
 
-const twoBy3 = 2 / 3;
-const oneBy3 = 1 / 3;
 
 export function isReadApplySimilarity(test: [number, number], isoForm: Coordinate) {
 	const testLength = test[1] - test[0];
@@ -207,6 +208,13 @@ export function isReadApplySimilarity(test: [number, number], isoForm: Coordinat
 		return false;
 	}
 	return true;
+}
+
+export function getSimilarityOverlap(test: [number, number], isoForm: Coordinate) {
+	const testLength = test[1] - test[0];
+	const exon = getCoveredExonLength(test, isoForm);
+	const intron = getCoveredIntronLength(test, isoForm);
+	return { exon, intron };
 }
 
 export function getCoveredExonLength(test: [number, number], isoForm: Coordinate) {
