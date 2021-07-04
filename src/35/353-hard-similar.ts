@@ -110,18 +110,12 @@ if (!isMainThread) {
 				.split('-')
 				.map(Number)
 				// .map(m => ({ start: m - delta, num: m, end: m + delta })) as Coordinate
-			)
-			.map(s => ({ num: s, delta: s[1] - s[0] }));
+			);
 
-		const delta = minBy(isoFormNum, co => co.delta)!.delta;
+		const deltaCo = minBy(isoFormNum, co => co[1] - co[0])!;
+		const delta = deltaCo[1] - deltaCo[0];
 
-		const isoForm = isoFormNum.map(
-			(s, si) => s.num.map(m => ({
-				start: m - (si === 0 ? 0 : s.delta),
-				num: m,
-				end: m + (si === isoFormNum.length - 1 ? 0 : s.delta)
-			})) as Coordinate
-		);
+		const isoForm = isoFormNum.map(s => s.map(m => ({ start: m - delta, num: m, end: m + delta })) as Coordinate);
 
 
 		isoForms[i] = { index, isoForm, delta };
@@ -194,13 +188,7 @@ const oneBy3 = 1 / 3;
 export function getReadMatchCount(test: [number, number][], isoForm: IsoForm, start: number) {
 	let exonOverlap = 0;
 	let intronOverlap = 0;
-	const firstOverlap = getFirstOverlap(test[0], isoForm[start]);
-	const lastOverlap = getLastOverlap(test[test.length - 1], isoForm[start + test.length - 1]);
-
-	exonOverlap += firstOverlap.exon + lastOverlap.exon;
-	intronOverlap += firstOverlap.intron + lastOverlap.intron;
-
-	for (let i = 1, x = start + 1, l = test.length - 1; i < l; i++, x++) {
+	for (let i = 0, x = start, l = test.length; i < l; i++, x++) {
 		const overlap = getSimilarityOverlap(test[i], isoForm[x]);
 		exonOverlap += overlap.exon;
 		intronOverlap += overlap.intron;
@@ -208,32 +196,9 @@ export function getReadMatchCount(test: [number, number][], isoForm: IsoForm, st
 	return (twoBy3 * exonOverlap) + (oneBy3 * intronOverlap);
 }
 
-
 export function getSimilarityOverlap(test: [number, number], isoForm: Coordinate) {
-	// const testLength = test[1] - test[0];
 	const exon = getCoveredExonLength(test, isoForm);
 	const intron = getCoveredIntronLength(test, isoForm);
-	return { exon, intron };
-}
-
-export function getFirstOverlap(test: [number, number], isoForm: Coordinate) {
-	// const testLength = test[1] - test[0];
-	const exon = getCoveredExonLength(test, isoForm);
-	if (test[0] < isoForm[0].num) {
-
-	}
-	const intron = test[0] < isoForm[0].num ?
-		getCoveredIntronLength([isoForm[0].num, test[1]], isoForm) :
-		getCoveredIntronLength(test, isoForm);
-	return { exon, intron };
-}
-
-export function getLastOverlap(test: [number, number], isoForm: Coordinate) {
-	// const testLength = test[1] - test[0];
-	const exon = getCoveredExonLength(test, isoForm);
-	const intron = test[1] > isoForm[0].num ?
-		getCoveredIntronLength([test[0], isoForm[1].num], isoForm) :
-		getCoveredIntronLength(test, isoForm);
 	return { exon, intron };
 }
 
