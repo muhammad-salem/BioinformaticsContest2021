@@ -155,7 +155,7 @@ export function findBestMatch(test: [number, number][], isoForms: IsoFormInfo[])
 			if (isoFormInfo.isoForm.length - x < test.length) {
 				continue fullSearch;
 			}
-			if (isReadMatchIsoFormByDelta(test[0], isoFormInfo.isoForm[x])) {
+			if (isReadSimilarToIsoForm(test[0], isoFormInfo.isoForm[x], isoFormInfo)) {
 				const count = getReadMatchCount(isoFormInfo.delta, test, isoFormInfo.isoForm, x, isoFormInfo);
 				if (count > 0) {
 					matches.push({ count, isoForm: isoFormInfo });
