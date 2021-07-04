@@ -144,21 +144,21 @@ export function findBestMatch(test: [number, number][], isoForms: IsoFormInfo[])
 	let matches: { count: number, isoForm: IsoFormInfo }[] = [];
 	fullSearch:
 	for (let index = 0; index < isoForms.length; index++) {
-		const isoForm = isoForms[index];
-		if (isoForm.isoForm.length < test.length) {
+		const isoFormInfo = isoForms[index];
+		if (isoFormInfo.isoForm.length < test.length) {
 			continue;
 		}
-		if (!isInRange(test, isoForm.isoForm)) {
+		if (!isInRange(test, isoFormInfo.isoForm)) {
 			continue;
 		}
-		for (let x = 0; x < isoForm.isoForm.length; x++) {
-			if (isoForm.isoForm.length - x < test.length) {
+		for (let x = 0; x < isoFormInfo.isoForm.length; x++) {
+			if (isoFormInfo.isoForm.length - x < test.length) {
 				continue fullSearch;
 			}
-			if (isReadMatchIsoFormByDelta(test[0], isoForm.isoForm[x])) {
-				const count = getReadMatchCount(isoForm.delta, test, isoForm.isoForm, x, isoForm);
+			if (isReadSimilarToIsoForm(test[0], isoFormInfo.isoForm[x], isoFormInfo)) {
+				const count = getReadMatchCount(isoFormInfo.delta, test, isoFormInfo.isoForm, x, isoFormInfo);
 				if (count > 0) {
-					matches.push({ count, isoForm });
+					matches.push({ count, isoForm: isoFormInfo });
 				}
 				continue fullSearch;
 			}
@@ -178,8 +178,8 @@ export function findBestMatch(test: [number, number][], isoForms: IsoFormInfo[])
 
 export function getReadMatchCount(delta: number, test: [number, number][], isoForm: IsoForm, start: number, info: IsoFormInfo) {
 	let count = 0;
-	for (let i = 1, x = start + 1, l = test.length - 1; i < l; i++, x++) {
-		if (!isReadSimilarToIsoForm(test[i], isoForm[x], info)) {
+	for (let i = 0, x = start, l = test.length - 1; i < l; i++, x++) {
+		if (!isInBlockNoDelta(test[i], isoForm[x])) {
 			return -1;
 		} else {
 			count++;
