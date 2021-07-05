@@ -189,9 +189,13 @@ export function getReadMatchCount(test: [number, number][], isoForm: IsoForm, st
 	let exonOverlap = 0;
 	let intronOverlap = 0;
 	for (let i = 0, x = start, l = test.length; i < l; i++, x++) {
-		const overlap = getSimilarityOverlap(test[i], isoForm[x]);
-		exonOverlap += overlap.exon;
-		intronOverlap += overlap.intron;
+		if (isInBlockNoDelta(test[i], isoForm[x])) {
+			const overlap = getSimilarityOverlap(test[i], isoForm[x]);
+			exonOverlap += overlap.exon;
+			intronOverlap += overlap.intron;
+		} else {
+			return -1;
+		}
 	}
 	return (twoBy3 * exonOverlap) + (oneBy3 * intronOverlap);
 }
@@ -229,6 +233,14 @@ export function getCoveredIntronLength(test: [number, number], isoForm: Coordina
 
 export function isReadMatchIsoFormByDelta(test: [number, number], isoForm: Coordinate) {
 	return test[0] >= isoForm[0].start && inRangeOfCellEnd(test, isoForm);
+}
+
+export function isInBlockNoDelta(test: [number, number], isoForm: Coordinate) {
+	return inRangeOfCellStart(test, isoForm) && inRangeOfCellEnd(test, isoForm);
+}
+
+export function inRangeOfCellStart(test: [number, number], isoForm: Coordinate) {
+	return test[0] >= isoForm[0].start && test[0] <= isoForm[0].end;
 }
 
 export function inRangeOfCellEnd(test: [number, number], isoForm: Coordinate) {
