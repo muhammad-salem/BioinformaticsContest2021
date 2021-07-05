@@ -186,21 +186,34 @@ const twoBy3 = 2 / 3;
 const oneBy3 = 1 / 3;
 
 export function getReadMatchCount(test: [number, number][], isoForm: IsoForm, start: number) {
+	// let count = 0;
 	let exonOverlap = 0;
 	let intronOverlap = 0;
 	for (let i = 0, x = start, l = test.length; i < l; i++, x++) {
-		if (isInBlockNoDelta(test[i], isoForm[x])) {
-			const overlap = getSimilarityOverlap(test[i], isoForm[x]);
-			exonOverlap += overlap.exon;
-			intronOverlap += overlap.intron;
-		} else {
-			return -1;
-		}
+		const overlap = getSimilarityOverlap(test[i], isoForm[x]);
+		exonOverlap += overlap.exon;
+		intronOverlap += overlap.intron;
 	}
 	return (twoBy3 * exonOverlap) + (oneBy3 * intronOverlap);
 }
 
+
+
+export function isReadApplySimilarity(test: [number, number], isoForm: Coordinate) {
+	const testLength = test[1] - test[0];
+	// const exonLength = getCoveredExonLength(test, isoForm);
+	const intronLength = getCoveredIntronLength(test, isoForm);
+	// if ((exonLength / testLength) > twoBy3) {
+	// 	return false;
+	// }
+	if ((intronLength / testLength) > oneBy3) {
+		return false;
+	}
+	return true;
+}
+
 export function getSimilarityOverlap(test: [number, number], isoForm: Coordinate) {
+	const testLength = test[1] - test[0];
 	const exon = getCoveredExonLength(test, isoForm);
 	const intron = getCoveredIntronLength(test, isoForm);
 	return { exon, intron };
@@ -233,14 +246,6 @@ export function getCoveredIntronLength(test: [number, number], isoForm: Coordina
 
 export function isReadMatchIsoFormByDelta(test: [number, number], isoForm: Coordinate) {
 	return test[0] >= isoForm[0].start && inRangeOfCellEnd(test, isoForm);
-}
-
-export function isInBlockNoDelta(test: [number, number], isoForm: Coordinate) {
-	return inRangeOfCellStart(test, isoForm) && inRangeOfCellEnd(test, isoForm);
-}
-
-export function inRangeOfCellStart(test: [number, number], isoForm: Coordinate) {
-	return test[0] >= isoForm[0].start && test[0] <= isoForm[0].end;
 }
 
 export function inRangeOfCellEnd(test: [number, number], isoForm: Coordinate) {

@@ -24,6 +24,7 @@
     "typescript.referencesCodeLens.enabled": true,
 	"typescript.tsdk": "node_modules/typescript/lib",
 	"cSpell.words": [
-		"Intron"
+		"Intron",
+		"introns"
 	]
 }
